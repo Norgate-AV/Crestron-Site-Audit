@@ -440,6 +440,7 @@ Format-SectionHeader -Title "SUMMARY IN $($seconds)s"
 Set-HostForeGroundColour -Colour Green
 $deviceInfo | Format-Table -Property IPAddress, Category, Hostname, Prompt, MACAddress, VersionOS, ProgramFile, SourceFile, Programmer, CompiledOn
 
+Write-Output "Total Control Systems: $($controlSystems.Count)"
 Write-Output "Total 2-Series Control Systems: $($($controlSystems | Where-Object { $_.Series -eq 2 }).Count)"
 Write-Output "Total 3-Series Control Systems: $($($controlSystems | Where-Object { $_.Series -eq 3 }).Count)"
 Write-Output "Total 4-Series Control Systems: $($($controlSystems | Where-Object { $_.Series -eq 4 }).Count)"
