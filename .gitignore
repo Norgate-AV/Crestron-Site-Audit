@@ -1,0 +1,17 @@
+# Exclude packaged modules
+*.zip
+
+# Exclude .NET assemblies from source
+*.dll
+
+# Exclude local history
+/.history
+
+# Exclude PSCrestron module
+/PSCrestron
+
+# Exclude manifest files
+manifest.json
+
+# Exclude audit folders
+/****-**-**_**-**-**
