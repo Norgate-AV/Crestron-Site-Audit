@@ -350,7 +350,8 @@ try {
             return
         }
 
-        $_.DiscoveredDevices | Export-Excel -Path (Join-Path -Path $_.DeviceDirectory -ChildPath "DiscoveredDevices.xlsx") -Append
+        $discoveredDevicesFile = Join-Path -Path $_.DeviceDirectory -ChildPath "DiscoveredDevices.xlsx"
+        $_.DiscoveredDevices | Export-Excel -Path $discoveredDevicesFile -Append
 
         $newDevices += $_.DiscoveredDevices | Where-Object { $_.Hostname -notin $deviceInfo.Hostname }
     }
@@ -375,7 +376,8 @@ if ($newDevices) {
     Set-HostForeGroundColour
 
     Write-Console -Message "New Devices Found: $($newDevices.Count)" -ForegroundColor Green
-    $newDevices | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "NewDevices.xlsx") -Append
+    $newDevicesFile = Join-Path -Path $OutputDirectory -ChildPath "NewDevices.xlsx"
+    $newDevices | Export-Excel -Path $newDevicesFile -Append
 }
 else {
     Write-Console -Message "No new devices discovered" -ForegroundColor Green
