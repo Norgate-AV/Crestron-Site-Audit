@@ -412,8 +412,9 @@ $deviceInfo | Select-Object -Property * -ExcludeProperty Credential, ProgramInfo
 $deviceInfo | `
     Select-Object -Property * `
     -ExcludeProperty Credential, RuntimeInfo, ProgramBootDirectory, SourceFile, ProgramFile, SystemName, Programmer, CompiledOn, `
-    CompilerRev, CrestronDb, DeviceDb, SymLibRev, IoLibRev, IopCfgRev, SourceEnv, TargetRack, ConfigRev, Include4DotDat, FriendlyName | `
-    ConvertTo-Json | `
+    CompilerRev, CrestronDb, DeviceDb, SymLibRev, IoLibRev, IopCfgRev, SourceEnv, TargetRack, ConfigRev, Include4DotDat, FriendlyName, `
+    Panel, Rackname, Orientation, VTpro, Database | `
+    ConvertTo-Json -Depth 4 | `
     Out-File -FilePath (Join-Path -Path $OutputDirectory -ChildPath "DeviceInfo.json") -Force
 
 
