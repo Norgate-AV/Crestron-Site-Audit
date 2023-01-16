@@ -79,7 +79,7 @@ $runtimeInfoScriptBlock = {
             }
         }
 
-        $controlSubnet = $device | Where-Object { $_.VersionRouter -ne "" }
+        $controlSubnet = $device | Select-ControlSubnet
         if ($controlSubnet) {
             $controlSubnetPortMap = Get-CrestronPersistentPort @deviceParams -All
 
