@@ -170,7 +170,7 @@ $deviceInfo = @()
 try {
     $runspaceJobParams = @{
         Name            = { "DeviceInfo-[$($_.address)]" }
-        ScriptBlock     = $getDeviceInfoScriptBlock
+        ScriptBlock     = $deviceInfoScriptBlock
         Throttle        = 50
         ModulesToImport = @("PSCrestron")
     }

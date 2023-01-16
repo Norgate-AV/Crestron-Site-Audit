@@ -29,10 +29,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-class ProjectInfo {
-    [string] $Device = ""
-    [string] $SourceFile = ""
-    [string] $ProgramFile = "No Project"
-    [string] $Programmer = ""
-    [string] $CompiledOn = ""
+Set-Variable -Name Series2 -Value 2 -Option ReadOnly -Scope Global -Force
+Set-Variable -Name Series3 -Value 3 -Option ReadOnly -Scope Global -Force
+Set-Variable -Name Series4 -Value 4 -Option ReadOnly -Scope Global -Force
+Set-Variable -Name Series -Value @{
+    Series2 = $Series2
+    Series3 = $Series3
+    Series4 = $Series4
+} -Option ReadOnly -Scope Global -Force
+
+function Get-ControlSystemSeries {
+    [CmdletBinding()]
+    [OutputType([int])]
+
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [PSCustomObject] $Device
+    )
+
+    begin {
+        $result = 0
+    }
+
+    process {
+        if ($Device.Category -ne "Control System") {
+            return $result
+        }
+
+        $pattern = '^[A-Z]+(?<series>\d)'
+    
+        $match = [regex]::Match($Device.Prompt, $pattern)
+
+        if ($match.Success) {
+            $result = [int] $match.Groups['series'].Value
+        }
+        else {
+            $result = $Series.Series2
+        }
+    }
+
+    end {
+        return $result
+    }
 }

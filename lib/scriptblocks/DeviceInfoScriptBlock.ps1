@@ -29,7 +29,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$getDeviceInfoScriptBlock = {
+$deviceInfoScriptBlock = {
     $device = $_
 
     $credentials = $using:credentials
@@ -44,7 +44,6 @@ $getDeviceInfoScriptBlock = {
 
         $deviceCredential = Get-DeviceCredential -Credentials $credentials -Id $device.credentialId
 
-
         $deviceParams = @{
             Device   = $device.address
             Secure   = $device.secure
@@ -57,7 +56,6 @@ $getDeviceInfoScriptBlock = {
         $versionInfo | Add-Member CredentialId $device.credentialId
         $versionInfo | Add-Member Credential $deviceCredential
         $versionInfo | Add-Member Secure $device.secure
-        # $versionInfo | Add-Member Series $device.series
 
         if ($versionInfo.ErrorMessage) {
             throw $versionInfo.ErrorMessage
@@ -65,6 +63,8 @@ $getDeviceInfoScriptBlock = {
 
         $controlSystem = $versionInfo | Where-Object { $_.Category -eq "Control System" -and $_.Prompt -ne "DM-MD64X64" }
         if ($controlSystem) {
+            $controlSystem | Add-Member Series ($controlSystem | Get-ControlSystemSeries)
+
             $programInfo = $controlSystem | Get-ControlSystemProgramInfo
 
             $versionInfo | Add-Member ProgramInfo $programInfo
@@ -73,14 +73,15 @@ $getDeviceInfoScriptBlock = {
                 $versionInfo | Add-Member $property.Name $property.Value
             }
 
-            $controlSystem | Add-Member Series ($controlSystem | Get-ControlSystemSeries)
         }
 
         $touchPanel = $versionInfo | Where-Object { $_.Category -eq "TouchPanel" }
         if ($touchPanel) {
-            $projectInfo = $touchPanel | Get-TouchPanelProjectInfo
+            $programInfo = $touchPanel | Get-TouchPanelProgramInfo
 
-            foreach ($property in $projectInfo.PSObject.Properties | Where-Object { $_.Name -ne "Device" }) {
+            $versionInfo | Add-Member ProgramInfo $programInfo
+
+            foreach ($property in $programInfo[0].PSObject.Properties | Where-Object { $_.Name -ne "Device" }) {
                 $versionInfo | Add-Member $property.Name $property.Value
             }
         }
