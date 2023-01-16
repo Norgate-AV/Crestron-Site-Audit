@@ -80,7 +80,7 @@ try {
     $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
 
     Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-        Write-Host "notice: Sourcing => $($_.FullName)" -ForegroundColor Yellow
+        Write-Verbose "notice: Sourcing => $($_.FullName)"
         . $_.FullName
     }
 }
