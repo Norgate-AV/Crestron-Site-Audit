@@ -29,7 +29,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-ControlSystemFiles {
+function Get-DeviceFiles {
     [CmdletBinding()]
 
     param (
@@ -43,38 +43,59 @@ function Get-ControlSystemFiles {
         [string] $OutputDirectory
     )
     
-    begin {
-        if ($Device.Series -lt 3) {
+    begin {}
+
+    process {
+        if ($Device.Category -eq "Control System" -and $Device.Series -lt $Series.Series3) {
             return
         }
 
-        $directories = @("AUTOUPDATELOGS", "CERT", "FIRMWARE", "EDID", "HTML", "NVRAM", "PLOG", "Program01", "Program02", "Program03", "Program04", "Program05", "Program06", "Program07", "Program08", "Program09", "Program10", "SSHBanner", "USER")
-
-        $params = @{
-            Device               = $Device.IPAddress
-            Secure               = $Device.Secure
-            Username             = $Device.Credential.Username
-            Password             = $Device.Credential.Password
-            CreateLocalDirectory = $true
-            Recurse              = $true
+        $commonParams = @{
+            Device   = $Device.IPAddress
+            Secure   = $Device.Secure
+            Username = $Device.Credential.Username
+            Password = $Device.Credential.Password
         }
-    }
 
-    process {
-        $directories | ForEach-Object {
-            $directory = $_
+        try {
+            $entities = Get-FTPDirectoryList @commonParams -Full
+        }
+        catch {
+            return
+        }
 
-            if ($Device.Series -ge 4) {
-                $directory = $directory.ToLower()
+        $entities | ForEach-Object {
+            $entity = $_
+
+            $localPath = Join-Path -Path $OutputDirectory -ChildPath $entity.Name
+
+            if ($entity.Directory) {    
+                $params = @{
+                    RemoteDirectory      = $entity.Name
+                    LocalDirectory       = $localPath
+                    CreateLocalDirectory = $true
+                    Recurse              = $true
+                }
+                
+                try {
+                    Get-FTPDirectory @commonParams @params
+                }
+                catch {
+                    continue
+                }
             }
-
-            $localDirectoryPath = Join-Path -Path $OutputDirectory -ChildPath $directory
-            
-            try {
-                Get-FTPDirectory @params -RemoteDirectory $directory -LocalDirectory $localDirectoryPath
-            }
-            catch {
-                continue
+            else {
+                $params = @{
+                    RemoteFile = $entity.Name
+                    LocalFile  = $localPath
+                }
+    
+                try {
+                    Get-FTPFile @commonParams @params
+                }
+                catch {
+                    continue
+                }
             }
         }
     }

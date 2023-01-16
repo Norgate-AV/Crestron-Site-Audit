@@ -29,45 +29,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-TouchPanelFiles {
-    [CmdletBinding()]
+$deviceFilesScriptBlock = {
+    $device = $_
 
-    param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [PSCustomObject]
-        [ValidateNotNullOrEmpty()]
-        $Device,
+    $cwd = $using:cwd
 
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $OutputDirectory
-    )
-
-    begin {
-        $directories = @("DISPLAY", "FIRMWARE", "LOGS", "PLOG", "NVRAM", "SSHBanner", "USER", "MEDIA", "ROMDISK", "HOMEPAGE")
-
-        $params = @{
-            Device               = $Device.IPAddress
-            Secure               = $Device.Secure
-            Username             = $Device.Credential.Username
-            Password             = $Device.Credential.Password
-            CreateLocalDirectory = $true
-            Recurse              = $true
+    try {
+        $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
+        
+        Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
+            . $_.FullName
         }
-    }
 
-    process {
-        $directories | ForEach-Object {
-            $localDirectoryPath = Join-Path -Path $OutputDirectory -ChildPath $_
-            
-            try {
-                Get-FTPDirectory @params -RemoteDirectory $directory -LocalDirectory $localDirectoryPath
-            }
-            catch {
-                continue
-            }
+        if ($device.ErrorMessage) {
+            throw $device.ErrorMessage
         }
-    }
 
-    end {}
+        $device | Get-DeviceFiles -OutputDirectory $device.DeviceDirectory
+    }
+    catch {}
+    finally {
+        $device
+    }
 }

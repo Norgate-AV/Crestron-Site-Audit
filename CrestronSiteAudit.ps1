@@ -291,59 +291,32 @@ finally {
 if ($BackupDeviceFiles) {
     Format-SectionHeader -Title "TASK [Backing up Device Files]"
 
-    $scriptBlock = {
-        $device = $_
-    
-        $cwd = $using:cwd
-    
-        try {
-            $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
-            
-            Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-                . $_.FullName
-            }
-    
-            if ($device.ErrorMessage) {
-                throw $device.ErrorMessage
-            }
-    
-            # $controlSystem = $device | Where-Object { $_.Category -eq "Control System" -and $_.Prompt -ne "DM-MD64X64" }
-            # if ($controlSystem) {
-            #     $deviceDirectory = $device | Get-DeviceDirectory -OutputDirectory $OutputDirectory
-            #     $device | Get-ControlSystemFiles -OutputDirectory $deviceDirectory
-            # }
-    
-            $touchPanel = $device | Where-Object { $_.Category -eq "TouchPanel" }
-            if ($touchPanel) {
-                $device | Get-TouchPanelFiles -OutputDirectory $device.DeviceDirectory
-            }
+    try {
+        $runspaceJobParams = @{
+            Name            = { "DeviceFiles-[$($_.Device)]" }
+            ScriptBlock     = $deviceFilesScriptBlock
+            Throttle        = 50
+            ModulesToImport = @("PSCrestron")
         }
-        catch {}
-        finally {
-            $device
-        }
-    }
 
-    $runspaceJobParams = @{
-        Name            = { "DeviceFiles-[$($_.Device)]" }
-        ScriptBlock     = $scriptBlock
-        Throttle        = 50
-        ModulesToImport = @("PSCrestron")
-    }
-    
-    $deviceInfo | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
-        $errorMessage = $_.ErrorMessage
-    
-        if ($errorMessage) {
-            Write-Console -Message "error: [$($_.Device)] => $errorMessage" -ForegroundColor Red
-            return
+        $deviceInfo | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
+            $errorMessage = $_.ErrorMessage
+
+            if ($errorMessage) {
+                Write-Console -Message "error: [$($_.Device)] => $errorMessage" -ForegroundColor Red
+                return
+            }
+
+            Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
         }
-    
-        Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
     }
-    
-    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
-    Get-RSJob | Remove-RSJob
+    catch {
+        Write-Host "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    }
+    finally {
+        Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
+        Get-RSJob | Remove-RSJob
+    }
 }
 
 
