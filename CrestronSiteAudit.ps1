@@ -109,20 +109,14 @@ $timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 if (!$OutputDirectory) {
     $OutputDirectory = Join-Path -Path $cwd -ChildPath $timestamp
 
-    Write-Warning "No output directory specified, using '$OutputDirectory'"
-    Write-Warning "Use the -OutputDirectory parameter to specify an output directory"
-
-    Write-Warning "Perhaps move creation of the output directory to later in the script?"
-    New-Item -Path $OutputDirectory -ItemType Directory -Force | Out-Null
+    Write-Verbose -Message "No output directory specified, using '$OutputDirectory'"
+    Write-Verbose -Message "Use the -OutputDirectory parameter to specify an output directory"
 }
-
-
-################################################################################
-# Check the output directory exists
-################################################################################
-if (!(Test-Path -Path $OutputDirectory -PathType "Container")) {
-    Write-Host "error: The output directory '$OutputDirectory' does not exist" -ForegroundColor Red
-    exit 1
+else {
+    if (!(Test-Path -Path $OutputDirectory -PathType "Container")) {
+        Write-Host "error: The output directory '$OutputDirectory' does not exist" -ForegroundColor Red
+        exit 1
+    }
 }
 
 
@@ -210,6 +204,15 @@ if ($deviceInfo.Count -eq 0) {
 
 if ($deviceInfo.Count -ne $devices.Count) {
     Write-Host "warning: Failed to get device information for all devices" -ForegroundColor Yellow
+}
+
+
+################################################################################
+# Create the output directory
+################################################################################
+if (!(Test-Path -Path $OutputDirectory -PathType "Container")) {
+    Write-Verbose -Message "notice: Creating audit output directory => '$OutputDirectory'"
+    New-Item -Path $OutputDirectory -ItemType Directory -Force | Out-Null
 }
 
 
