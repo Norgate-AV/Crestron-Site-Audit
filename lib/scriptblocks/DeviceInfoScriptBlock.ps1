@@ -37,7 +37,7 @@ $deviceInfoScriptBlock = {
 
     try {
         $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
-        
+
         Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
             . $_.FullName
         }
@@ -61,7 +61,7 @@ $deviceInfoScriptBlock = {
             throw $versionInfo.ErrorMessage
         }
 
-        $controlSystem = $versionInfo | Where-Object { $_.Category -eq "Control System" -and $_.Prompt -ne "DM-MD64X64" }
+        $controlSystem = $versionInfo | Select-ControlSystem
         if ($controlSystem) {
             $controlSystem | Add-Member Series ($controlSystem | Get-ControlSystemSeries)
 
@@ -75,7 +75,7 @@ $deviceInfoScriptBlock = {
 
         }
 
-        $touchPanel = $versionInfo | Where-Object { $_.Category -eq "TouchPanel" }
+        $touchPanel = $versionInfo | Select-TouchPanel
         if ($touchPanel) {
             $programInfo = $touchPanel | Get-TouchPanelProgramInfo
 

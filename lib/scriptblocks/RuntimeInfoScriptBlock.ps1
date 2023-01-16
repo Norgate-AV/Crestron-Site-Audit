@@ -52,7 +52,7 @@ $runtimeInfoScriptBlock = {
             Password = $device.Credential.Password
         }
 
-        $controlSystem = $device | Where-Object { $_.Category -eq "Control System" -and $_.Prompt -ne "DM-MD64X64" }
+        $controlSystem = $device | Select-ControlSystem
         if ($controlSystem) {
             $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $controlSystemRuntimeInfoCommands
 
@@ -68,7 +68,7 @@ $runtimeInfoScriptBlock = {
             }
         }
 
-        $touchPanel = $device | Where-Object { $_.Category -eq "TouchPanel" }
+        $touchPanel = $device | Select-TouchPanel
         if ($touchPanel) {
             $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $touchPanelRuntimeInfoCommands
 

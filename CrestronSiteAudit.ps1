@@ -224,7 +224,7 @@ if (!(Test-Path -Path $OutputDirectory -PathType "Container")) {
 # Filter Control Systems
 ################################################################################
 $controlSystems = @()
-$controlSystems += $deviceInfo | Where-Object { $_.Category -eq "Control System" -and $_.Prompt -ne "DM-MD64X64" }
+$controlSystems += $deviceInfo | Select-ControlSystem
 if ($controlSystems) {
     Format-SectionHeader -Title "CONTROL SYSTEMS"
     Set-HostForeGroundColour -Colour Green
@@ -241,7 +241,7 @@ if ($controlSystems) {
 # Filter Touch Panels
 ################################################################################
 $touchPanels = @()
-$touchPanels += $deviceInfo | Where-Object { $_.Category -eq "TouchPanel" }
+$touchPanels += $deviceInfo | Select-TouchPanel
 if ($touchPanels) {
     Format-SectionHeader -Title "TOUCH PANELS"
     Set-HostForeGroundColour -Colour Green
