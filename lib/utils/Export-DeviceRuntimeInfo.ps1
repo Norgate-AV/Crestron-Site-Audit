@@ -42,8 +42,10 @@ function Export-DeviceRuntimeInfo {
     $deviceDirectory = $Device.DeviceDirectory
     New-Item -Path $deviceDirectory -Type Directory -Force | Out-Null
 
-    $runtimeInfoFile = Join-Path -Path $deviceDirectory -ChildPath "$($Device.Category | ConvertTo-PascalCase)RuntimeInfo.txt"
-    $Device.RuntimeInfo.Info | Out-File -FilePath $runtimeInfoFile -Force
+    if ($Device.RuntimeInfo.Info) {
+        $runtimeInfoFile = Join-Path -Path $deviceDirectory -ChildPath "$($Device.Category | ConvertTo-PascalCase)RuntimeInfo.txt"
+        $Device.RuntimeInfo.Info | Out-File -FilePath $runtimeInfoFile -Force
+    }
 
     $programInfoFile = Join-Path -Path $deviceDirectory -ChildPath "Programs.xlsx"
     $Device.ProgramInfo | Export-Excel -Path $programInfoFile
