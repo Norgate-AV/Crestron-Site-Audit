@@ -176,14 +176,14 @@ try {
     }
 
     $devices | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
-        $deviceInfo += $_
-
         $errorMessage = $_.ErrorMessage
 
         if ($errorMessage) {
             Write-Console -Message "error: [$($_.Device)] => $errorMessage" -ForegroundColor Red
             return
         }
+
+        $deviceInfo += $_
 
         Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
     }
