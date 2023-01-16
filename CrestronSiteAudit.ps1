@@ -47,6 +47,10 @@ param(
     $BackupDeviceFiles = $false
 )
 
+
+################################################################################
+# Get the current working directory
+################################################################################
 if ($PSScriptRoot) {
     $cwd = $PSScriptRoot
 }
