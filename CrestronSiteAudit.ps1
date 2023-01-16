@@ -32,11 +32,11 @@ SOFTWARE.
 [CmdletBinding()]
 
 param(
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [string]
     [ValidateNotNullOrEmpty()]
     [ValidatePattern(".+\.(json)$")]
-    $ManifestFile,
+    $ManifestFile = "manifest.json",
 
     [Parameter(Mandatory = $false)]
     [string]
