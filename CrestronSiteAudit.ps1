@@ -156,7 +156,7 @@ Format-SectionHeader -Title "AUDIT DETAILS"
 Write-Host -ForegroundColor Green "Manifest File => $ManifestFile"
 Write-Host -ForegroundColor Green "Device Count => $($devices.Count)"
 Write-Host -ForegroundColor Green "Device File Backup => $($BackupDeviceFiles)"
-
+Write-Host
 Write-Host -ForegroundColor Green "Output Directory => $OutputDirectory"
 Write-Host -ForegroundColor Green "Audit File => $outputFile"
 
