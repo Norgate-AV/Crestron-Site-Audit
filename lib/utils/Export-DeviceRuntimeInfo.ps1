@@ -70,5 +70,6 @@ function Export-DeviceRuntimeInfo {
     if ($Device.CresnetInfo) {
         $cresnetInfoFile = Join-Path -Path $deviceDirectory -ChildPath "CresnetInfo.xlsx"
         $Device.CresnetInfo | Export-Excel -Path $cresnetInfoFile
+        Write-Verbose "notice: [$($Device.Device)] => Cresnet Device Count: $(@($Device.CresnetInfo).Count)"
     }
 }
