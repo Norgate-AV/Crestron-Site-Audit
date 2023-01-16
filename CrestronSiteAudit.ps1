@@ -204,6 +204,7 @@ finally {
 
 if ($deviceInfo.Count -eq 0) {
     Write-Host "error: Failed to get device information" -ForegroundColor Red
+    Invoke-CleanUp
     exit 1
 }
 
@@ -459,7 +460,4 @@ $deviceInfo | Select-Object -Property * -ExcludeProperty Credential, ProgramInfo
 ################################################################################
 # Clean up
 ################################################################################
-Get-CrestronSession | ForEach-Object {
-    Write-Console -Message "notice: Closing session => $_" -ForegroundColor Yellow
-    $_ | Close-CrestronSession
-}
+Invoke-CleanUp
