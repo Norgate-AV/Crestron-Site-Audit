@@ -29,14 +29,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$getRuntimeInfoScriptBlock = {
+$runtimeInfoScriptBlock = {
     $device = $_
 
     $cwd = $using:cwd
 
     try {
         $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
-        
+
         Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
             . $_.FullName
         }
@@ -54,7 +54,7 @@ $getRuntimeInfoScriptBlock = {
 
         $controlSystem = $device | Where-Object { $_.Category -eq "Control System" -and $_.Prompt -ne "DM-MD64X64" }
         if ($controlSystem) {
-            $runtimeInfo = $device | Get-ControlSystemRuntimeInfo
+            $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $controlSystemRuntimeInfoCommands
 
             $device | Add-Member RuntimeInfo $runtimeInfo
 
@@ -70,7 +70,7 @@ $getRuntimeInfoScriptBlock = {
 
         $touchPanel = $device | Where-Object { $_.Category -eq "TouchPanel" }
         if ($touchPanel) {
-            $runtimeInfo = $device | Get-TouchPanelRuntimeInfo
+            $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $touchPanelRuntimeInfoCommands
 
             $device | Add-Member RuntimeInfo $runtimeInfo
 
@@ -79,25 +79,23 @@ $getRuntimeInfoScriptBlock = {
             }
         }
 
-        # $controlSubnet = $device | Where-Object { $_.VersionRouter -ne "" }
-        # if ($controlSubnet) {
-        #     $controlSubnetPortMap = Get-CrestronPersistentPort @deviceParams -All
-            
-        #     $controlSubnetInfo = [PSCustomObject] @{
-        #         DhcpLeases     = $device | Get-ControlSubnetDhcpLeases
-        #         # ReservedLeases = $device | Get-ControlSubnetReservedLeases
-        #         # DhcpLeases     = @()
-        #         ReservedLeases = @()
-        #         PortMap        = $controlSubnetPortMap | Select-Object -Property * -ExcludeProperty Device
-        #     }
+        $controlSubnet = $device | Where-Object { $_.VersionRouter -ne "" }
+        if ($controlSubnet) {
+            $controlSubnetPortMap = Get-CrestronPersistentPort @deviceParams -All
 
-        #     $device | Add-Member ControlSubnetInfo $controlSubnetInfo
-        # }
+            $controlSubnetInfo = [PSCustomObject] @{
+                DhcpLeases     = $device | Get-ControlSubnetDhcpLeases
+                ReservedLeases = $device | Get-ControlSubnetReservedLeases
+                PortMap        = $controlSubnetPortMap
+            }
 
-        # $ipTableInfo = Get-IPTable @deviceParams
-        # if ($ipTableInfo) {
-        #     $device | Add-Member IPTableInfo $ipTableInfo
-        # }
+            $device | Add-Member ControlSubnetInfo $controlSubnetInfo
+        }
+
+        $ipTableInfo = Get-IPTable @deviceParams
+        if ($ipTableInfo) {
+            $device | Add-Member IPTableInfo ($ipTableInfo | Sort-Object -Property CIPId)
+        }
     }
     catch {}
     finally {

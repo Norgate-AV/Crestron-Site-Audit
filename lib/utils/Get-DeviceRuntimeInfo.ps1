@@ -29,56 +29,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-TouchPanelRuntimeInfo {
+function Get-DeviceRuntimeInfo {
     [CmdletBinding()]
 
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [PSCustomObject]
         [ValidateNotNullOrEmpty()]
-        $Device
+        $Device,
+
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject[]]
+        [ValidateNotNullOrEmpty()]
+        $Commands
     )
 
     begin {
-        $commands = @(
-            @{
-                Section  = "Device Hostname"
-                Commands = @("hostname")
-            },
-            @{
-                Section  = "Device Version Info"
-                Commands = @("ver -v", "ver -all")
-            },
-            @{
-                Section  = "Network Status"
-                Commands = @("ipconfig /all", "who", "ipt -t", "netstat", "iproute")
-            },
-            @{
-                Section  = "Memory Free"
-                Commands = @("ramfree")
-            },
-            @{
-                Section  = "Time Status"
-                Commands = @("timez", "time", "uptime")
-            },
-            @{
-                Section  = "Error Log"
-                Commands = @("err")
-            }
-        )
-    }
-
-    process {
         $runtimeInfo = [PSCustomObject] @{
-            Device       = $Device.Device
-            Hostname     = $Device.Hostname
-            IPAddress    = $Device.IPAddress
             Info         = ""
             ErrorMessage = ""
         }
-        
+    }
+
+    process {
+        $params = @{
+            Device   = $Device.IPAddress
+            Secure   = $Device.Secure
+            Username = $Device.Credential.Username
+            Password = $Device.Credential.Password
+        }
+
         try {
-            $session = Open-CrestronSession -Device $Device.IPAddress -Secure:$Device.Secure -Username $Device.Credential.Username -Password $Device.Credential.Password
+            $session = Open-CrestronSession @params
 
             $runtimeInfo.Info += "Crestron $($Device.Category) Connected: $($Device.IPAddress)`r`n`r`n"
 

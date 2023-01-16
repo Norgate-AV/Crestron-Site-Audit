@@ -255,25 +255,23 @@ Format-SectionHeader -Title "TASK [Getting Runtime Information]"
 try {
     $runspaceJobParams = @{
         Name            = { "RuntimeInfo-[$($_.Device)]" }
-        ScriptBlock     = $getRuntimeInfoScriptBlock
+        ScriptBlock     = $runtimeInfoScriptBlock
         Throttle        = 50
         ModulesToImport = @("PSCrestron")
     }
-	
+
     $deviceInfo | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
         $errorMessage = $_.RuntimeInfo.ErrorMessage
-	
+
         if ($errorMessage) {
             Write-Console -Message "error: [$($_.Device)] => $errorMessage" -ForegroundColor Red
             return
         }
-	
+
         $_ | Export-DeviceRuntimeInfo
-	
+
         Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
     }
-	
-    
 }
 catch {
     Write-Host "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
