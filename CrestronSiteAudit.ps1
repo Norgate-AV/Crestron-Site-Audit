@@ -326,65 +326,38 @@ if ($BackupDeviceFiles) {
 Format-SectionHeader -Title "TASK [Searching for Devices not in Manifest]"
 $newDevices = @()
 
-$scriptBlock = {
-    $device = $_
-    
-    $cwd = $using:cwd
-    # $getUtils = $using:Get-Utils
+try {
+    $runspaceJobParams = @{
+        Name            = { "DeviceSearch-[$($_.Device)]" }
+        ScriptBlock     = $deviceSearchScriptBlock
+        Throttle        = 50
+        ModulesToImport = @("PSCrestron")
+    }
 
-    try {
-        $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
-            
-        Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-            . $_.FullName
-        }
-    
-        if ($device.ErrorMessage) {
-            throw $device.ErrorMessage
+    $controlSystems | Where-Object { $_.Series -ge 3 } | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
+        if (!$_.DiscoveredDevices) {
+            Write-Console -Message "error: [$($_.Device)] => Failed to read autodiscovery" -ForegroundColor Red
+            return
         }
 
-        $deviceParams = @{
-            Device   = $device.IPAddress
-            Secure   = $device.Secure
-            Username = $device.Credential.Username
-            Password = $device.Credential.Password
+        Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
+
+        if ($_.DiscoveredDevices.Count -eq 0) {
+            return
         }
 
-        $discoveredDevices = Read-AutoDiscovery @deviceParams
-        $device | Add-Member DiscoveredDevices $discoveredDevices
-    }
-    catch {}
-    finally {
-        $device
+        $_.DiscoveredDevices | Export-Excel -Path (Join-Path -Path $_.DeviceDirectory -ChildPath "DiscoveredDevices.xlsx") -Append
+
+        $newDevices += $_.DiscoveredDevices | Where-Object { $_.Hostname -notin $deviceInfo.Hostname }
     }
 }
-
-$runspaceJobParams = @{
-    Name            = { "DeviceSearch-[$($_.Device)]" }
-    ScriptBlock     = $scriptBlock
-    Throttle        = 50
-    ModulesToImport = @("PSCrestron")
+catch {
+    Write-Host "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
-    
-$controlSystems | Where-Object { $_.Series -ge 3 } | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
-    if (!$_.DiscoveredDevices) {
-        Write-Console -Message "error: [$($_.Device)] => Failed to read autodiscovery" -ForegroundColor Red
-        return
-    }
-
-    Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
-
-    if ($_.DiscoveredDevices.Count -eq 0) {
-        return
-    }
-
-    $_.DiscoveredDevices | Export-Excel -Path (Join-Path -Path $_.DeviceDirectory -ChildPath "DiscoveredDevices.xlsx") -Append
-
-    $newDevices += $_.DiscoveredDevices | Where-Object { $_.Hostname -notin $deviceInfo.Hostname }
+finally {
+    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
+    Get-RSJob | Remove-RSJob
 }
-
-Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
-Get-RSJob | Remove-RSJob
 
 
 ################################################################################
