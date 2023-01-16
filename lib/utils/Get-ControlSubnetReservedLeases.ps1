@@ -43,22 +43,22 @@ function Get-ControlSubnetReservedLeases {
         $leases = @()
 
         $pattern = [regex] '(?i)(?<mac>(?:[a-f\d]{2}(?: |\.|:)){5}[a-f\d]{2}) *\| *(?<ip>[\x21-\x7a][\x20-\x7a]+[\x21-\x7a]) *\| *(?<description>[\w-]+)'
-
-        $params = {
-            Device = $Device.IPAddress
-            Secure = $Device.Secure
-            Username = $Device.Credential.Username
-            Password = $Device.Credential.Password
-        }
     }
 
     process {
         try {
+            $params = @{
+                Device   = $Device.IPAddress
+                Secure   = $Device.Secure
+                Username = $Device.Credential.Username
+                Password = $Device.Credential.Password
+            }
+
             $response = ("reservedl") | Invoke-CrestronCommand @params
 
-            $match = $pattern.Matches($response)
+            $patternMatches = $pattern.Matches($response)
 
-            $match | ForEach-Object {
+            $patternMatches | ForEach-Object {
                 $leases += [PSCustomObject] @{
                     MacAddress  = $_.Groups["mac"].Value.ToUpper()
                     IPAddress   = $_.Groups["ip"].Value
@@ -72,6 +72,6 @@ function Get-ControlSubnetReservedLeases {
     }
     
     end {
-        return $leases | Sort-Object IPAddress
+        return $leases | Sort-Object -Property IPAddress
     }
 }
