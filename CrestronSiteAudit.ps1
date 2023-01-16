@@ -457,6 +457,13 @@ Set-HostForeGroundColour
 $deviceInfo | Select-Object -Property * -ExcludeProperty Credential, ProgramInfo, RuntimeInfo, IPTableInfo, DiscoveredDevices | `
     Export-Excel -Path $outputFile -Append
 
+$deviceInfo | `
+    Select-Object -Property * `
+    -ExcludeProperty Credential, RuntimeInfo, ProgramBootDirectory, SourceFile, ProgramFile, SystemName, Programmer, CompiledOn, `
+    CompilerRev, CrestronDb, DeviceDb, SymLibRev, IoLibRev, IopCfgRev, SourceEnv, TargetRack, ConfigRev, Include4DotDat, FriendlyName | `
+    ConvertTo-Json | `
+    Out-File -FilePath (Join-Path -Path $OutputDirectory -ChildPath "DeviceInfo.json") -Force
+
 
 ################################################################################
 # Clean up
