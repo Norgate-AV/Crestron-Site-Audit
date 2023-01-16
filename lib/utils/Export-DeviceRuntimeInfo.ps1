@@ -43,7 +43,7 @@ function Export-DeviceRuntimeInfo {
     New-Item -Path $deviceDirectory -Type Directory -Force | Out-Null
 
     if ($Device.RuntimeInfo.Info) {
-        $runtimeInfoFile = Join-Path -Path $deviceDirectory -ChildPath "$($Device.Category | ConvertTo-PascalCase)RuntimeInfo.txt"
+        $runtimeInfoFile = Join-Path -Path $deviceDirectory -ChildPath "RuntimeInfo.txt"
         $Device.RuntimeInfo.Info | Out-File -FilePath $runtimeInfoFile -Force
     }
 
