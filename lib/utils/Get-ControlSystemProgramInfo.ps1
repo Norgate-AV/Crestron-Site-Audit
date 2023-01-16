@@ -29,18 +29,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-try {
-    $parentDirectory = Split-Path -Parent $PSCommandPath
-
-    $libDirectory = Join-Path -Path $parentDirectory -ChildPath ".." -Resolve
-    $typesDirectory = Join-Path -Path $libDirectory -ChildPath "types" -Resolve
-
-    . (Join-Path -Path $typesDirectory -ChildPath "ProgramInfo.ps1")
-}
-catch {
-    Write-Error -Message "Failed to load ProgramInfo.ps1" -ErrorAction Stop
-}
-
 function Convert-ProgramInfo {
 
     [CmdletBinding()]
@@ -57,8 +45,25 @@ function Convert-ProgramInfo {
         $ConsoleResponse
     )
 
-    $result = [ProgramInfo] @{
-        Device = $Device.Hostname
+    $result = [PSCustomObject] @{
+        Device               = $Device.Hostname
+        ProgramBootDirectory = ""
+        SourceFile           = ""
+        ProgramFile          = "No Program"
+        SystemName           = ""
+        Programmer           = ""
+        CompiledOn           = ""
+        CompilerRev          = ""
+        CrestronDb           = ""
+        DeviceDb             = ""
+        SymLibRev            = ""
+        IoLibRev             = ""
+        IopCfgRev            = ""
+        SourceEnv            = ""
+        TargetRack           = ""
+        ConfigRev            = ""
+        Include4DotDat       = ""
+        FriendlyName         = ""
     }
 
     $pattern = '[\s\S]+Program Boot Directory[\s]*:[\s]*([\s\S]+)[\s\S]+Source File[\s]*:[\s]*([\s\S]+)[\s\S]+Program File[\s]*:[\s]*([\s\S].+)[\s\S]+System Name[\s]*:[\s]*([\s\S]+)[\s\S]+Programmer[\s]*:[\s]*([\s\S]+)[\s\S]+Compiled On[\s]*:[\s]*([\w\ \/\:]+)[\s\S]+Compiler Rev[\s]*:[\s]*([\w\.]+)[\s\S]+CrestronDB[\s]*:[\s]*([\w\.]+)[\s\S]+DeviceDB[\s]*:[\s]*([\w\.]+)[\s\S]+SYMLIB Rev[\s]*:[\s]*([\w\.]+)[\s\S]+IOLIB Rev[\s]*:[\s]*([\w\.]+)[\s\S]+IOPCFG Rev[\s]*:[\s]*([\w\.]+)[\s\S]+Source Env[\s]*:[\s]*([\s\S].+)[\s\S]+Target Rack[\s]*:[\s]*([\s\S].+)[\s\S]+Config Rev[\s]*:[\s]*([\w\.]+)[\s\S]+Include4\.dat[\s]*:[\s]*([\w\.]+)[\s\S]+Friendly Name[\s]*:[\s]*([\w\.]+)'
@@ -66,30 +71,30 @@ function Convert-ProgramInfo {
     $regex = [Regex]::new($pattern, [System.Text.RegularExpressions.RegexOptions]::Multiline)
 
     $match = $regex.Match($ConsoleResponse)
-                
+
     if (!$match.Success) {
         return $result
     }
-    
+
     $groups = $match.Groups
-    
-    $result.ProgramBootDirectory = $groups[1].Value
-    $result.SourceFile = $groups[2].Value
-    $result.ProgramFile = $groups[3].Value
-    $result.SystemName = $groups[4].Value
-    $result.Programmer = $groups[5].Value
-    $result.CompiledOn = $groups[6].Value
-    $result.CompilerRev = $groups[7].Value
-    $result.CrestronDb = $groups[8].Value
-    $result.DeviceDb = $groups[9].Value
-    $result.SymLibRev = $groups[10].Value
-    $result.IoLibRev = $groups[11].Value
-    $result.IopCfgRev = $groups[12].Value
-    $result.SourceEnv = $groups[13].Value
-    $result.TargetRack = $groups[14].Value
-    $result.ConfigRev = $groups[15].Value
-    $result.Include4DotDat = $groups[16].Value
-    $result.FriendlyName = $groups[17].Value
+
+    $result.ProgramBootDirectory = $groups[1].Value.Trim()
+    $result.SourceFile = $groups[2].Value.Trim()
+    $result.ProgramFile = $groups[3].Value.Trim()
+    $result.SystemName = $groups[4].Value.Trim()
+    $result.Programmer = $groups[5].Value.Trim()
+    $result.CompiledOn = $groups[6].Value.Trim()
+    $result.CompilerRev = $groups[7].Value.Trim()
+    $result.CrestronDb = $groups[8].Value.Trim()
+    $result.DeviceDb = $groups[9].Value.Trim()
+    $result.SymLibRev = $groups[10].Value.Trim()
+    $result.IoLibRev = $groups[11].Value.Trim()
+    $result.IopCfgRev = $groups[12].Value.Trim()
+    $result.SourceEnv = $groups[13].Value.Trim()
+    $result.TargetRack = $groups[14].Value.Trim()
+    $result.ConfigRev = $groups[15].Value.Trim()
+    $result.Include4DotDat = $groups[16].Value.Trim()
+    $result.FriendlyName = $groups[17].Value.Trim()
 
     return $result
 }
@@ -103,36 +108,49 @@ function Get-ControlSystemProgramInfo {
         [PSCustomObject] $Device
     )
 
-    $programInfoList = @()
-    
-    try {
-        $session = Open-CrestronSession -Device $Device.IPAddress -Secure:$Device.Secure -Username $Device.Credential.Username -Password $Device.Credential.Password
+    begin {
+        $programInfoList = @()
+    }
 
-        if ($Device.Series -ge 3) {
+    process {
+        try {
+            $params = @{
+                Device   = $Device.IPAddress
+                Secure   = $Device.Secure
+                Username = $Device.Credential.Username
+                Password = $Device.Credential.Password
+            }
+
+            $session = Open-CrestronSession @params
+
+            if ($Device.Series -ge 3) {
             (1..10) | ForEach-Object {
-                $response = Invoke-CrestronSession $session "progcomments:$_"
+                    $response = Invoke-CrestronSession $session "progcomments:$_"
+
+                    $programInfo = Convert-ProgramInfo -Device $Device -ConsoleResponse $response
+
+                    $programInfoList += $programInfo
+                }
+            }
+            else {
+                $response = Invoke-CrestronSession $session "progcomments"
 
                 $programInfo = Convert-ProgramInfo -Device $Device -ConsoleResponse $response
 
                 $programInfoList += $programInfo
             }
         }
-        else {
-            $response = Invoke-CrestronSession $session "progcomments"
+        catch {
 
-            $programInfo = Convert-ProgramInfo -Device $Device -ConsoleResponse $response
-
-            $programInfoList += $programInfo
+        }
+        finally {
+            if ($session) {
+                Close-CrestronSession $session
+            }
         }
     }
-    catch {
-        
+
+    end {
+        return $programInfoList
     }
-    finally {
-        if ($session) {
-            Close-CrestronSession $session
-        }
-    }
-    
-    return $programInfoList
 }
