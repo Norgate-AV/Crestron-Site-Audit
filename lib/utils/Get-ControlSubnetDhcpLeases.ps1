@@ -47,14 +47,14 @@ function Get-ControlSubnetDhcpLeases {
 
     process {
         try {
-            # $params = {
-            #     Device = $Device.IPAddress
-            #     Secure = $Device.Secure
-            #     Username = $Device.Credential.Username
-            #     Password = $Device.Credential.Password
-            # }
+            $params = @{
+                Device   = $Device.IPAddress
+                Secure   = $Device.Secure
+                Username = $Device.Credential.Username
+                Password = $Device.Credential.Password
+            }
 
-            $response = Invoke-CrestronCommand -Device $Device.IPAddress -Command "dhcpl" -Secure:$Device.Secure -Username $Device.Credential.Username -Password $Device.Credential.Password
+            $response = ("dhcpl") | Invoke-CrestronCommand @params
 
             $patternMatches = $pattern.Matches($response)
 
@@ -72,6 +72,6 @@ function Get-ControlSubnetDhcpLeases {
     }
     
     end {
-        return $leases
+        return $leases | Sort-Object -Property IPAddress
     }
 }
