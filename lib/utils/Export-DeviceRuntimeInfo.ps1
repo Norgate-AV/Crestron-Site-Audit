@@ -60,8 +60,8 @@ function Export-DeviceRuntimeInfo {
 
     if ($Device.ControlSubnetInfo) {
         $controlSubnetInfoFile = Join-Path -Path $deviceDirectory -ChildPath "ControlSubnet.xlsx"
-        # $Device.ControlSubnetInfo.DhcpLeases | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "DhcpLeases" -Append
-        # $Device.ControlSubnetInfo.ReservedLeases | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "ReservedLeases" -Append
+        $Device.ControlSubnetInfo.DhcpLeases | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "DhcpLeases" -Append
+        $Device.ControlSubnetInfo.ReservedLeases | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "ReservedLeases" -Append
         Write-Console -Message "notice: [$($Device.Device)] => Control Subnet DHCP Lease Count: $($Device.ControlSubnetInfo.DhcpLeases.Count)" -ForegroundColor Yellow
         Write-Console -Message "notice: [$($Device.Device)] => Control Subnet Reserved Lease Count: $($Device.ControlSubnetInfo.ReservedLeases.Count)" -ForegroundColor Yellow
         $Device.ControlSubnetInfo.PortMap | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "PortMap" -Append
