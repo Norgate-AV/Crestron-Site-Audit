@@ -72,7 +72,7 @@ try {
     }
 }
 catch {
-    Write-Host "error: Failed to import PSCrestron => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    Write-Console -Message "error: Failed to import PSCrestron => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
     exit 1
 }
 
@@ -89,7 +89,7 @@ try {
     }
 }
 catch {
-    Write-Host "error: Failed to source utils => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    Write-Console -Message "error: Failed to source utils => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
     exit 1
 }
 
@@ -100,7 +100,7 @@ catch {
 $ManifestFile = Resolve-Path -Path $ManifestFile
 
 if (!(Test-Path -Path $ManifestFile -PathType "Leaf")) {
-    Write-Host "error: The manifest file '$ManifestFile' does not exist" -ForegroundColor Red
+    Write-Console -Message "error: The manifest file '$ManifestFile' does not exist" -ForegroundColor Red
     exit 1
 }
 
@@ -118,7 +118,7 @@ if (!$OutputDirectory) {
 }
 else {
     if (!(Test-Path -Path $OutputDirectory -PathType "Container")) {
-        Write-Host "error: The output directory '$OutputDirectory' does not exist" -ForegroundColor Red
+        Write-Console -Message "error: The output directory '$OutputDirectory' does not exist" -ForegroundColor Red
         exit 1
     }
 }
@@ -131,7 +131,7 @@ try {
     $manifest = Get-Content -Path $ManifestFile | ConvertFrom-Json
 }
 catch {
-    Write-Host "error: Unable to parse manifest file '$ManifestFile'" -ForegroundColor Red
+    Write-Console -Message "error: Unable to parse manifest file '$ManifestFile'" -ForegroundColor Red
     exit 1
 }
 
@@ -143,7 +143,7 @@ $credentials = $manifest.credentials
 # Check there are devices to process
 ################################################################################
 if (!$devices) {
-    Write-Host "error: No devices found in the manifest file '$ManifestFile'" -ForegroundColor Red
+    Write-Console -Message "error: No devices found in the manifest file '$ManifestFile'" -ForegroundColor Red
     exit 1
 }
 
@@ -157,12 +157,12 @@ $outputFile = Join-Path -Path $OutputDirectory -ChildPath "CrestronAudit_$timest
 Remove-Item -Path $outputFile -ErrorAction SilentlyContinue
 
 Format-SectionHeader -Title "AUDIT DETAILS"
-Write-Host -ForegroundColor Green "Manifest File => $ManifestFile"
-Write-Host -ForegroundColor Green "Device Count => $($devices.Count)"
-Write-Host -ForegroundColor Green "Device File Backup => $($BackupDeviceFiles)"
-Write-Host
-Write-Host -ForegroundColor Green "Output Directory => $OutputDirectory"
-Write-Host -ForegroundColor Green "Audit File => $outputFile"
+Write-Console -ForegroundColor Green -Message "Manifest File => $ManifestFile"
+Write-Console -ForegroundColor Green -Message "Device Count => $($devices.Count)"
+Write-Console -ForegroundColor Green -Message "Device File Backup => $($BackupDeviceFiles)"
+Write-Console
+Write-Console -ForegroundColor Green -Message "Output Directory => $OutputDirectory"
+Write-Console -ForegroundColor Green -Message "Audit File => $outputFile"
 
 
 ################################################################################
@@ -193,7 +193,7 @@ try {
     }
 }
 catch {
-    Write-Host "error: Failed to get device information => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    Write-Console -Message "error: Failed to get device information => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
 finally {
     Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
@@ -201,13 +201,13 @@ finally {
 }
 
 if ($deviceInfo.Count -eq 0) {
-    Write-Host "error: Failed to get device information" -ForegroundColor Red
+    Write-Console -Message "error: Failed to get device information" -ForegroundColor Red
     Invoke-CleanUp
     exit 1
 }
 
 if ($deviceInfo.Count -ne $devices.Count) {
-    Write-Host "warning: Failed to get device information for all devices" -ForegroundColor Yellow
+    Write-Console -Message "warning: Failed to get device information for all devices" -ForegroundColor Yellow
 }
 
 
@@ -281,7 +281,7 @@ try {
     }
 }
 catch {
-    Write-Host "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
 finally {
     Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
@@ -315,7 +315,7 @@ if ($BackupDeviceFiles) {
         }
     }
     catch {
-        Write-Host "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+        Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
     }
     finally {
         Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
@@ -357,7 +357,7 @@ try {
     }
 }
 catch {
-    Write-Host "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
 finally {
     Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
@@ -368,7 +368,7 @@ finally {
 ################################################################################
 # Report on new devices
 ################################################################################
-Write-Host
+Write-Console
 Format-SectionHeader -Title "DISCOVERED DEVICES"
 if ($newDevices) {
     Set-HostForeGroundColour -Colour Green

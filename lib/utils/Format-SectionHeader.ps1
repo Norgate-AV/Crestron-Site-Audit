@@ -38,15 +38,15 @@ function Format-SectionHeader {
         [ValidateNotNullOrEmpty()]
         $Title
     )
-    
+
     $width = $Host.UI.RawUI.WindowSize.Width
     $width -= ($Title.Length + 1)
-    
+
     $sectionHeader += "$Title "
     for ($x = 0; $x -lt $width; $x++) {
         $sectionHeader += "*"
     }
-    
-    Write-Host
-    Write-Host $sectionHeader
+
+    Write-Console
+    Write-Console $sectionHeader
 }
