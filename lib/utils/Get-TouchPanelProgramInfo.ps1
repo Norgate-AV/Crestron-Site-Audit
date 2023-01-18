@@ -97,20 +97,20 @@ function Get-TouchPanelProgramInfo {
 
             $files | ForEach-Object {
                 $path = Join-Path -Path $localTempFolder -ChildPath $_.Name
-                
+
                 if (!(Test-Path -Path $path)) {
                     throw
                 }
-                
+
                 $content = Get-Content -Path $path -Raw
-                
+
                 $pattern = [regex] $_.Pattern
                 $match = $pattern.Match($content)
-                
+
                 if (!$match.Success) {
                     throw
                 }
-                
+
                 foreach ($key in $_.Properties.Keys) {
                     $programInfo.$key = $match.Groups[$_.Properties[$key]].Value.Trim()
                 }

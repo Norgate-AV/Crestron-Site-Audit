@@ -15,7 +15,7 @@ function Invoke-CleanUp {
             $_ | Remove-RSJob -Force
         }
     }
-    
+
     if ($crestronSessions.Count -gt 0) {
         $crestronSessions | ForEach-Object {
             Write-Console -Message "notice: Closing Crestron session => $($_.Handle) : $($_.Hostname)" -ForegroundColor Yellow

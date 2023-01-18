@@ -31,16 +31,16 @@ SOFTWARE.
 
 $deviceSearchScriptBlock = {
     $device = $_
-    
+
     $cwd = $using:cwd
 
     try {
         $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
-            
+
         Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
             . $_.FullName
         }
-    
+
         if ($device.ErrorMessage) {
             throw $device.ErrorMessage
         }

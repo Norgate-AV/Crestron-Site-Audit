@@ -38,6 +38,6 @@ function ConvertTo-PascalCase {
         [ValidateNotNullOrEmpty()]
         $Value
     )
-    
+
     return [regex]::Replace($Value, '(?i)(?:^|[_ -]+)(\p{L})', { $args[0].Groups[1].Value.ToUpper() })
 }

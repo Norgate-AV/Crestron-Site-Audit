@@ -42,7 +42,7 @@ function Get-DeviceFiles {
         [ValidateNotNullOrEmpty()]
         [string] $OutputDirectory
     )
-    
+
     begin {}
 
     process {
@@ -69,14 +69,14 @@ function Get-DeviceFiles {
 
             $localPath = Join-Path -Path $OutputDirectory -ChildPath $entity.Name
 
-            if ($entity.Directory) {    
+            if ($entity.Directory) {
                 $params = @{
                     RemoteDirectory      = $entity.Name
                     LocalDirectory       = $localPath
                     CreateLocalDirectory = $true
                     Recurse              = $true
                 }
-                
+
                 try {
                     Get-FTPDirectory @commonParams @params
                 }
@@ -89,7 +89,7 @@ function Get-DeviceFiles {
                     RemoteFile = $entity.Name
                     LocalFile  = $localPath
                 }
-    
+
                 try {
                     Get-FTPFile @commonParams @params
                 }

@@ -67,10 +67,10 @@ function Get-ControlSubnetDhcpLeases {
             }
         }
         catch {
-            
+
         }
     }
-    
+
     end {
         return $leases | Sort-Object -Property IPAddress
     }

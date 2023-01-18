@@ -57,7 +57,7 @@ function Get-ControlSystemSeries {
         }
 
         $pattern = '^[A-Z]+(?<series>\d)'
-    
+
         $match = [regex]::Match($Device.Prompt, $pattern)
 
         if ($match.Success) {
