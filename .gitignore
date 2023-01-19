@@ -4,6 +4,12 @@
 # Exclude .NET assemblies from source
 *.dll
 
+# Exclude environment files
+.env
+
+# Exclude key files
+*.key
+
 # Exclude local history
 /.history
 
