@@ -29,22 +29,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-DeviceCredential {
+function Get-Aes256KeyByteArray {
     [CmdletBinding()]
 
     param (
         [Parameter(Mandatory = $true)]
-        [PSCustomObject[]] $Credentials,
-
-        [Parameter(Mandatory = $true)]
-        [guid] $Id
+        [ValidateNotNullOrEmpty()]
+        [ValidateCount(5, 32)]
+        [string] $Key
     )
 
-    $deviceCredential = ($Credentials | Where-Object { $_.id -eq $Id }).credential
-    ($username, $password) = $($deviceCredential | Invoke-Aes256Decrypt -Key $(Get-Aes256KeyByteArray -Key $env:AES_KEY)).Split(":")
+    $keyByteArray = [System.Text.Encoding]::UTF8.GetBytes($Key)
 
-    return [PSCustomObject] @{
-        Username = $username
-        Password = $password
+    $length = $keyByteArray.Length
+
+    if ($length -lt 32) {
+        $keyByteArray += [System.Byte[]]::new(32 - $length)
     }
+
+    return $keyByteArray
+}
+
+if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
+    Get-Aes256KeyByteArray @args
 }

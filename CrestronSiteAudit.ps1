@@ -95,6 +95,24 @@ catch {
 
 
 ################################################################################
+# Get/Set environment variables
+################################################################################
+try {
+    $envVariables = Get-EnvironmentFileVariableList -File ".\.env"
+
+    if ($envVariables) {
+        $envVariables | Foreach-Object {
+            [Environment]::SetEnvironmentVariable($_.Variable, $_.Value)
+        }
+    }
+}
+catch {
+    Write-Console -Message "error: Failed to set environment variables => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    exit 1
+}
+
+
+################################################################################
 # Check the manifest file exists
 ################################################################################
 $ManifestFile = Resolve-Path -Path $ManifestFile

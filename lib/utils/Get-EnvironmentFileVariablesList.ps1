@@ -29,22 +29,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-DeviceCredential {
+function Get-EnvironmentFileVariableList {
     [CmdletBinding()]
 
-    param (
+    param(
         [Parameter(Mandatory = $true)]
-        [PSCustomObject[]] $Credentials,
-
-        [Parameter(Mandatory = $true)]
-        [guid] $Id
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $File
     )
 
-    $deviceCredential = ($Credentials | Where-Object { $_.id -eq $Id }).credential
-    ($username, $password) = $($deviceCredential | Invoke-Aes256Decrypt -Key $(Get-Aes256KeyByteArray -Key $env:AES_KEY)).Split(":")
+    $File = Resolve-Path -Path $File
 
-    return [PSCustomObject] @{
-        Username = $username
-        Password = $password
+    $variableList = @()
+
+    $pattern = [regex] '^(?<variable>[\w]+)=(?<value>.+)$'
+
+    try {
+        $content = Get-Content -Path $File -Raw
     }
+    catch {
+        throw "Unable to read environment file: $File"
+    }
+
+    $patternMatches = $pattern.Matches($content)
+
+    if ($patternMatches.Count -eq 0) {
+        throw "No variables found in environment file."
+    }
+
+    $patternMatches | ForEach-Object {
+        $match = $_
+
+        $variableList += [PSCustomObject] @{
+            Variable = $match.Groups["variable"].Value
+            Value    = $match.Groups["value"].Value.Trim()
+        }
+    }
+
+    return $variableList
+}
+
+if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
+    Get-EnvironmentFileVariableList @args
 }
