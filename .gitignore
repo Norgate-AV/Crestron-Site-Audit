@@ -18,6 +18,7 @@
 
 # Exclude manifest files
 manifest.json
+*.manifest.json
 
 # Exclude audit folders
 /****-**-**_**-**-**
