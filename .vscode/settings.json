@@ -46,5 +46,6 @@
     "powershell.codeFormatting.whitespaceAroundOperator": true,
     "powershell.codeFormatting.whitespaceAfterSeparator": true,
     "powershell.scriptAnalysis.enable": true,
-    "powershell.scriptAnalysis.settingsPath": "PSScriptAnalysisSettings.psd1"
+    "powershell.scriptAnalysis.settingsPath": "PSScriptAnalysisSettings.psd1",
+    "dotenv.enableAutocloaking": true
 }
