@@ -1,0 +1,46 @@
+{
+    "description": "manifest",
+    "type": "object",
+    "allowAdditionalProperties": false,
+    "properties": {
+        "credentials": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "allowAdditionalProperties": false,
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string",
+                        "optional": true
+                    },
+                    "credential": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "devices": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "allowAdditionalProperties": false,
+                "properties": {
+                    "address": {
+                        "type": "string"
+                    },
+                    "secure": {
+                        "type": "boolean"
+                    },
+                    "credentialId": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}
