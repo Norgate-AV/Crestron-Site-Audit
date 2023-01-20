@@ -278,7 +278,7 @@ $touchPanels += $deviceInfo | Select-TouchPanel
 if ($touchPanels) {
     Format-SectionHeader -Title "TOUCH PANELS"
     Set-HostForeGroundColour -Colour Green
-    $touchPanels | Format-Table -Property IPAddress, Category, Hostname, Prompt, MACAddress, VersionOS, Series
+    $touchPanels | Format-Table -Property IPAddress, Category, Hostname, Prompt, MACAddress, VersionOS
     Set-HostForeGroundColour
 
     $touchPanels | ForEach-Object {
