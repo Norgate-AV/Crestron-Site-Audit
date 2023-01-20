@@ -418,6 +418,21 @@ else {
 
 
 ################################################################################
+# Export final audit report
+################################################################################
+$deviceInfo | Select-Object -Property * -ExcludeProperty Credential, ProgramInfo, RuntimeInfo, IPTableInfo, DiscoveredDevices | `
+    Export-Excel -Path $outputFile -Append
+
+$deviceInfo | `
+    Select-Object -Property * `
+    -ExcludeProperty Credential, RuntimeInfo, ProgramBootDirectory, SourceFile, ProgramFile, SystemName, Programmer, CompiledOn, `
+    CompilerRev, CrestronDb, DeviceDb, SymLibRev, IoLibRev, IopCfgRev, SourceEnv, TargetRack, ConfigRev, Include4DotDat, FriendlyName, `
+    Panel, Rackname, Orientation, VTpro, Database | `
+    ConvertTo-Json -Depth 4 | `
+    Out-File -FilePath (Join-Path -Path $OutputDirectory -ChildPath "DeviceInfo.json") -Force
+
+
+################################################################################
 # Show Summary
 ################################################################################
 $stopwatch.Stop()
@@ -435,21 +450,6 @@ Write-Output "Total 4-Series Control Systems: $(@($controlSystems | Where-Object
 Write-Output "Total Touch Panels: $(@($touchPanels).Count)"
 
 Set-HostForeGroundColour
-
-
-################################################################################
-# Export final audit report
-################################################################################
-$deviceInfo | Select-Object -Property * -ExcludeProperty Credential, ProgramInfo, RuntimeInfo, IPTableInfo, DiscoveredDevices | `
-    Export-Excel -Path $outputFile -Append
-
-$deviceInfo | `
-    Select-Object -Property * `
-    -ExcludeProperty Credential, RuntimeInfo, ProgramBootDirectory, SourceFile, ProgramFile, SystemName, Programmer, CompiledOn, `
-    CompilerRev, CrestronDb, DeviceDb, SymLibRev, IoLibRev, IopCfgRev, SourceEnv, TargetRack, ConfigRev, Include4DotDat, FriendlyName, `
-    Panel, Rackname, Orientation, VTpro, Database | `
-    ConvertTo-Json -Depth 4 | `
-    Out-File -FilePath (Join-Path -Path $OutputDirectory -ChildPath "DeviceInfo.json") -Force
 
 
 ################################################################################
