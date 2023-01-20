@@ -81,7 +81,7 @@ function Get-DeviceFiles {
                     Get-FTPDirectory @commonParams @params
                 }
                 catch {
-                    continue
+                    return
                 }
             }
             else {
@@ -94,7 +94,7 @@ function Get-DeviceFiles {
                     Get-FTPFile @commonParams @params
                 }
                 catch {
-                    continue
+                    return
                 }
             }
         }
