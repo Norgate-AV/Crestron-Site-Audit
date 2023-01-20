@@ -29,59 +29,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Invoke-Aes256Decrypt {
+function Convert-Sha256HashToString {
     [CmdletBinding()]
 
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $Data,
-
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $Key
+        [byte[]]
+        $Hash
     )
 
-    begin {}
-
-    process {
-        try {
-            $aes = [System.Security.Cryptography.AesCryptoServiceProvider]::new()
-            $aes.Key = Get-Aes256KeyHash -Key $Key
-
-            $encrypted = [System.Convert]::FromBase64String($Data)
-
-            $iv = $encrypted[0..15]
-            $aes.IV = $iv
-
-            $decryptor = $aes.CreateDecryptor()
-            $unencrypted = $decryptor.TransformFinalBlock($encrypted, 16, $encrypted.Length - 16)
-
-            $result = [System.Text.Encoding]::UTF8.GetString($unencrypted)
-        }
-        catch {
-            Write-Error $_.Exception.GetBaseException().Message
-        }
-        finally {
-            $aes.Dispose()
-        }
-    }
-
-    end {
-        if ($result) {
-            return $result
-        }
-    }
+    return [System.BitConverter]::ToString($hash).Replace("-", "")
 }
 
 if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    try {
-        . "$PSScriptRoot\Get-Aes256KeyHash.ps1"
-        . "$PSScriptRoot\Get-Sha256Hash.ps1"
-    }
-    catch {
-        throw "Failed to import functions: $_"
-    }
-
-    Invoke-Aes256Decrypt @args
+    Convert-Sha256HashToString @args
 }

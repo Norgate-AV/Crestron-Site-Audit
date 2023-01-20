@@ -41,7 +41,7 @@ function Get-DeviceCredential {
     )
 
     $deviceCredential = ($Credentials | Where-Object { $_.id -eq $Id }).credential
-    ($username, $password) = $($deviceCredential | Invoke-Aes256Decrypt -Key $(Get-Aes256KeyByteArray -Key $env:AES_KEY)).Split(":")
+    ($username, $password) = $($deviceCredential | Invoke-Aes256Decrypt -Key $env:AES_KEY).Split(":")
 
     return [PSCustomObject] @{
         Username = $username

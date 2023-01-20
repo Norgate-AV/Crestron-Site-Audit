@@ -29,27 +29,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-Aes256KeyByteArray {
+function Get-Aes256KeyHash {
     [CmdletBinding()]
 
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateCount(5, 32)]
         [string] $Key
     )
 
-    $keyByteArray = [System.Text.Encoding]::UTF8.GetBytes($Key)
-
-    $length = $keyByteArray.Length
-
-    if ($length -lt 32) {
-        $keyByteArray += [System.Byte[]]::new(32 - $length)
-    }
-
-    return $keyByteArray
+    return Get-Sha256Hash -Data $Key
 }
 
 if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    Get-Aes256KeyByteArray @args
+    try {
+        . "$PSScriptRoot\Get-Sha256Hash.ps1"
+    }
+    catch {
+        throw "Failed to import functions: $_"
+    }
+
+    Get-Aes256KeyHash @args
 }

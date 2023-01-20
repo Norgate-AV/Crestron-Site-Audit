@@ -29,59 +29,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Invoke-Aes256Decrypt {
+function Get-Sha256Hash {
     [CmdletBinding()]
 
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $Data,
-
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $Key
+        [string]
+        $Data
     )
 
-    begin {}
-
-    process {
-        try {
-            $aes = [System.Security.Cryptography.AesCryptoServiceProvider]::new()
-            $aes.Key = Get-Aes256KeyHash -Key $Key
-
-            $encrypted = [System.Convert]::FromBase64String($Data)
-
-            $iv = $encrypted[0..15]
-            $aes.IV = $iv
-
-            $decryptor = $aes.CreateDecryptor()
-            $unencrypted = $decryptor.TransformFinalBlock($encrypted, 16, $encrypted.Length - 16)
-
-            $result = [System.Text.Encoding]::UTF8.GetString($unencrypted)
-        }
-        catch {
-            Write-Error $_.Exception.GetBaseException().Message
-        }
-        finally {
-            $aes.Dispose()
-        }
+    try {
+        $hasher = [System.Security.Cryptography.HashAlgorithm]::Create('sha256')
+        $hash = $hasher.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($Data))
+    }
+    catch {
+        throw "Failed to create SHA256 hash: $($_.Exception.GetBaseException().Message)"
+    }
+    finally {
+        $hasher.Dispose()
     }
 
-    end {
-        if ($result) {
-            return $result
-        }
-    }
+    return $hash
 }
 
 if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    try {
-        . "$PSScriptRoot\Get-Aes256KeyHash.ps1"
-        . "$PSScriptRoot\Get-Sha256Hash.ps1"
-    }
-    catch {
-        throw "Failed to import functions: $_"
-    }
-
-    Invoke-Aes256Decrypt @args
+    Get-Sha256Hash @args
 }

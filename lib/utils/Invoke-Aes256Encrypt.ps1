@@ -39,8 +39,7 @@ function Invoke-Aes256Encrypt {
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateCount(32, 32)]
-        [byte[]] $Key
+        [string] $Key
     )
 
     begin {}
@@ -52,7 +51,7 @@ function Invoke-Aes256Encrypt {
             $rng.GetBytes($iv)
 
             $aes = [System.Security.Cryptography.AesCryptoServiceProvider]::new()
-            $aes.Key = $Key
+            $aes.Key = Get-Aes256KeyHash -Key $Key
             $aes.IV = $iv
 
             $unencrypted = [System.Text.Encoding]::UTF8.GetBytes($Data)
@@ -80,5 +79,13 @@ function Invoke-Aes256Encrypt {
 }
 
 if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
+    try {
+        . "$PSScriptRoot\Get-Aes256KeyHash.ps1"
+        . "$PSScriptRoot\Get-Sha256Hash.ps1"
+    }
+    catch {
+        throw "Failed to import functions: $_"
+    }
+
     Invoke-Aes256Encrypt @args
 }
