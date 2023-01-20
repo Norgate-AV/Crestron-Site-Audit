@@ -190,6 +190,7 @@ Remove-Item -Path $outputFile -ErrorAction SilentlyContinue
 
 Format-SectionHeader -Title "AUDIT DETAILS"
 Write-Console -ForegroundColor Green -Message "Manifest File => $ManifestFile"
+Write-Console -ForegroundColor Green -Message "Environment File => $envFile"
 Write-Console -ForegroundColor Green -Message "Device Count => $($devices.Count)"
 Write-Console -ForegroundColor Green -Message "Device File Backup => $($BackupDeviceFiles)"
 Write-Console
