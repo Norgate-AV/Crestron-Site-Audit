@@ -1,0 +1,31 @@
+{
+    "credentials": [
+        {
+            "id": "6d05468a-a11f-4082-b088-203694a71eb6",
+            "name": "credential 1",
+            "credential": "[username:password] - encrypted with AES256 key"
+        },
+        {
+            "id": "1903509a-9937-48fc-874f-622476d07c08",
+            "name": "credential 2",
+            "credential": "[username:password] - encrypted with AES256 key"
+        }
+    ],
+    "devices": [
+        {
+            "address": "device-01",
+            "secure": true,
+            "credentialId": "6d05468a-a11f-4082-b088-203694a71eb6"
+        },
+        {
+            "address": "10.0.1.2",
+            "secure": true,
+            "credentialId": "1903509a-9937-48fc-874f-622476d07c08"
+        },
+        {
+            "address": "device-03",
+            "secure": false,
+            "credentialId": ""
+        }
+    ]
+}
