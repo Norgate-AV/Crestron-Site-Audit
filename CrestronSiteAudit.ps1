@@ -95,10 +95,24 @@ catch {
 
 
 ################################################################################
+# Search for the environment file
+################################################################################
+$envFile = Find-Up -FileName ".env"
+
+if ($envFile) {
+    Write-Verbose -Message "notice: Found environment file => $envFile"
+}
+else {
+    Write-Console -Message "error: Failed to find environment file" -ForegroundColor Red
+    exit 1
+}
+
+
+################################################################################
 # Get/Set environment variables
 ################################################################################
 try {
-    $envVariables = Get-EnvironmentFileVariableList -File ".\.env"
+    $envVariables = Get-EnvironmentFileVariableList -File $envFile
 
     if ($envVariables) {
         $envVariables | Foreach-Object {
