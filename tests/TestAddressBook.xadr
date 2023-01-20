@@ -1,0 +1,23 @@
+[Crestron_Toolbox_Address_Book]
+
+[AddressBookInfo]
+Schema=3.0
+Version=1.0
+DefaultEntry=
+
+[ComSpecs]
+Device 1=auto 172.22.0.1,2222;username alice;password secret
+Device 2=ssh 172.22.0.1;username crestron
+Device 3=ssh 172.22.0.1;username bob;password supersecret;pat auto,TSW
+Device 4=ctp 172.22.0.1
+Device 5=ssl 172.22.0.1,2232;username charlie;password passtest;console secondary;pat ssh,DTP,443
+
+[Notes]
+Device 1=This is device 1
+Device 2=This is device 2
+Device 3=This is device 3
+Device 4=This is device 4
+Device 5=This is device 5
+
+[ExtComSpecs]
+
