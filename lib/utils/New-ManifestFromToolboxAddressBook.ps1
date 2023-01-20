@@ -36,63 +36,91 @@ function New-ManifestFromToolboxAddressBook {
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]
-        $AddressBook,
-
-        [Parameter(Mandatory = $false)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $ManifestFile = "manifest.json"
+        $AddressBook
     )
 
-    $manifest = [PSCustomObject]@{
+    $manifest = [PSCustomObject] @{
         credentials = @()
         devices     = @()
     }
 
-    $devices = Read-ToolboxAddressBook -AddressBook $AddressBook
+    try {
+        $devices = Read-ToolboxAddressBook -AddressBook $AddressBook
 
-    $envFile = Find-Up -FileName ".env"
+        $devices | ForEach-Object {
+            $device = $_
+            $manifest.devices += [PSCustomObject] @{
+                address      = $device.Address
+                secure       = ($device.Connection -eq "ssh" -or $device.Connection -eq "ssl" -or $device.Username -ne "")
+                credentialId = ""
+            }
+        }
 
-    if ($envFile) {
+        if ($devices.Username.Count -eq 0) {
+            return $manifest | ConvertTo-Json
+        }
+
+        $envFile = Find-Up -FileName ".env"
+        if (!$envFile) {
+            return $manifest | ConvertTo-Json
+        }
+
         $envVariables = Get-EnvironmentFileVariableList -File $envFile
-
         $envVariables | ForEach-Object {
             [Environment]::SetEnvironmentVariable($_.Variable, $_.Value)
         }
-    }
 
-    # $devices | ForEach-Object {
-    #     $device = $_
+        if (!$env:AES_KEY) {
+            return $manifest | ConvertTo-Json
+        }
 
-    #     if (!$device.Username) {
-    #         continue
-    #     }
+        $devices | ForEach-Object {
+            $device = $_
 
+            if (!$device.Username) {
+                return
+            }
 
-    #     $manifest.credentials += [PSCustomObject]@{
-    #         id = New-Guid
-    #     }
-    # }
+            $encryptedCredential = "$($device.Username):$($device.Password)" | Invoke-Aes256Encrypt -Key $env:AES_KEY
 
-    $devices | ForEach-Object {
-        $device = $_
+            if ($encryptedCredential -in $manifest.credentials.credential) {
+                $manifest.devices | Where-Object { $_.address -eq $device.Address } | ForEach-Object {
+                    $_.credentialId = $manifest.credentials | `
+                        Where-Object { $_.credential -eq $encryptedCredential } | `
+                        Select-Object -ExpandProperty id
+                }
 
-        $manifest.devices += [PSCustomObject]@{
-            address      = $device.Address
-            secure       = ($device.Connection -eq "ssh" -or $device.Connection -eq "ssl")
-            credentialId = ""
+                return
+            }
+
+            $credential = [PSCustomObject] @{
+                id         = New-Guid
+                name       = "Credential $($manifest.credentials.Count + 1)"
+                credential = $encryptedCredential
+            }
+
+            $manifest.credentials += $credential
+
+            $manifest.devices | Where-Object { $_.address -eq $device.Address } | ForEach-Object {
+                $_.credentialId = $credential.id
+            }
         }
     }
+    catch {
+        Write-Error -Message "Error creating manifest file: $($_.Exception.GetBaseException().Message)"
+        exit 1
+    }
 
-    $manifest | ConvertTo-Json -Depth 10 | Out-File -FilePath $ManifestFile -Force
+    return $manifest | ConvertTo-Json
 }
 
 if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
     try {
         . "$PSScriptRoot\Read-ToolboxAddressBook.ps1"
         . "$PSScriptRoot\Get-EnvironmentFileVariableList.ps1"
+        . "$PSScriptRoot\Get-Aes256KeyHash.ps1"
+        . "$PSScriptRoot\Get-Sha256Hash.ps1"
         . "$PSScriptRoot\Invoke-Aes256Encrypt.ps1"
-        . "$PSScriptRoot\Get-Aes256KeyByteArray.ps1"
         . "$PSScriptRoot\Find-Up.ps1"
     }
     catch {
