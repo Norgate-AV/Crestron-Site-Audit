@@ -422,8 +422,9 @@ else {
 ################################################################################
 $stopwatch.Stop()
 $seconds = [Math]::Round($stopwatch.Elapsed.TotalSeconds, 0)
+$timespan = New-TimeSpan -Seconds $seconds
 
-Format-SectionHeader -Title "SUMMARY IN $($seconds)s"
+Format-SectionHeader -Title "SUMMARY IN $($timespan.ToString("h'h 'm'm 's's'"))"
 Set-HostForeGroundColour -Colour Green
 $deviceInfo | Format-Table -Property IPAddress, Category, Hostname, Prompt, MACAddress, VersionOS, ProgramFile, SourceFile, Programmer, CompiledOn
 
