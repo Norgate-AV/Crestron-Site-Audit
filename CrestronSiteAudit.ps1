@@ -229,7 +229,7 @@ catch {
     Write-Console -Message "error: Failed to get device information => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
 finally {
-    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
+    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
     Get-RSJob | Remove-RSJob -Force
 }
 
@@ -317,7 +317,7 @@ catch {
     Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
 finally {
-    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
+    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
     Get-RSJob | Remove-RSJob -Force
 }
 
@@ -351,7 +351,7 @@ if ($BackupDeviceFiles) {
         Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
     }
     finally {
-        Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
+        Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
         Get-RSJob | Remove-RSJob
     }
 }
@@ -384,7 +384,7 @@ try {
         }
 
         $discoveredDevicesFile = Join-Path -Path $_.DeviceDirectory -ChildPath "DiscoveredDevices.xlsx"
-        $_.DiscoveredDevices | Export-Excel -Path $discoveredDevicesFile -Append
+        $_.DiscoveredDevices | Export-Excel -Path $discoveredDevicesFile -FreezeTopRow -AutoSize -Append
 
         $newDevices += $_.DiscoveredDevices | Where-Object { $_.Hostname -notin $deviceInfo.Hostname }
     }
@@ -393,7 +393,7 @@ catch {
     Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
 finally {
-    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -Append
+    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
     Get-RSJob | Remove-RSJob
 }
 
@@ -410,7 +410,7 @@ if ($newDevices) {
 
     Write-Console -Message "New Devices Found: $($newDevices.Count)" -ForegroundColor Green
     $newDevicesFile = Join-Path -Path $OutputDirectory -ChildPath "NewDevices.xlsx"
-    $newDevices | Export-Excel -Path $newDevicesFile -Append
+    $newDevices | Export-Excel -Path $newDevicesFile -FreezeTopRow -AutoSize -Append
 }
 else {
     Write-Console -Message "No new devices discovered" -ForegroundColor Green
@@ -421,7 +421,7 @@ else {
 # Export final audit report
 ################################################################################
 $deviceInfo | Select-Object -Property * -ExcludeProperty Credential, ProgramInfo, RuntimeInfo, IPTableInfo, DiscoveredDevices | `
-    Export-Excel -Path $outputFile -Append
+    Export-Excel -Path $outputFile -FreezeTopRow -AutoSize -Append
 
 $deviceInfo | `
     Select-Object -Property * `

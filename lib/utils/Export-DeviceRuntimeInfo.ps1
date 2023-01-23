@@ -49,27 +49,27 @@ function Export-DeviceRuntimeInfo {
 
     if ($Device.ProgramInfo) {
         $programInfoFile = Join-Path -Path $deviceDirectory -ChildPath "Programs.xlsx"
-        $Device.ProgramInfo | Export-Excel -Path $programInfoFile
+        $Device.ProgramInfo | Export-Excel -Path $programInfoFile -FreezeTopRow -AutoSize
         Write-Verbose "notice: [$($Device.Device)] => Program Count: $(@($Device.ProgramInfo | Where-Object { $_.ProgramFile -ne "No Program" }).Count)"
     }
 
     if ($Device.IPTableInfo) {
         $ipTableInfoFile = Join-Path -Path $deviceDirectory -ChildPath "IPTables.xlsx"
-        $Device.IPTableInfo | Export-Excel -Path $ipTableInfoFile
+        $Device.IPTableInfo | Export-Excel -Path $ipTableInfoFile -FreezeTopRow -AutoSize
     }
 
     if ($Device.ControlSubnetInfo) {
         $controlSubnetInfoFile = Join-Path -Path $deviceDirectory -ChildPath "ControlSubnet.xlsx"
-        $Device.ControlSubnetInfo.DhcpLeases | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "DhcpLeases" -Append
-        $Device.ControlSubnetInfo.ReservedLeases | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "ReservedLeases" -Append
+        $Device.ControlSubnetInfo.DhcpLeases | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "DhcpLeases" -FreezeTopRow -AutoSize -Append
+        $Device.ControlSubnetInfo.ReservedLeases | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "ReservedLeases" -FreezeTopRow -AutoSize -Append
         Write-Verbose "notice: [$($Device.Device)] => Control Subnet DHCP Lease Count: $(@($Device.ControlSubnetInfo.DhcpLeases).Count)"
         Write-Verbose "notice: [$($Device.Device)] => Control Subnet Reserved Lease Count: $(@($Device.ControlSubnetInfo.ReservedLeases).Count)"
-        $Device.ControlSubnetInfo.PortMap | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "PortMap" -Append
+        $Device.ControlSubnetInfo.PortMap | Export-Excel -Path $controlSubnetInfoFile -WorksheetName "PortMap" -FreezeTopRow -AutoSize -Append
     }
 
     if ($Device.CresnetInfo) {
         $cresnetInfoFile = Join-Path -Path $deviceDirectory -ChildPath "CresnetInfo.xlsx"
-        $Device.CresnetInfo | Export-Excel -Path $cresnetInfoFile
+        $Device.CresnetInfo | Export-Excel -Path $cresnetInfoFile -FreezeTopRow -AutoSize
         Write-Verbose "notice: [$($Device.Device)] => Cresnet Device Count: $(@($Device.CresnetInfo).Count)"
     }
 }
