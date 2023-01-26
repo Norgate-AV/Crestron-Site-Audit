@@ -4,6 +4,7 @@
     ExcludeRules        = @(
         "PSUseOutputTypeCorrectly",
         "PSAvoidUsingUserNameAndPassWordParams",
-        "PSAvoidUsingPlainTextForPassword"
+        "PSAvoidUsingPlainTextForPassword",
+        "PSAvoidUsingWriteHost"
     )
 }
