@@ -538,7 +538,7 @@ if ($BackupDeviceFiles) {
 ################################################################################
 # Run auto discovery on each device to report on any new devices
 ################################################################################
-Format-SectionHeader -Title "TASK [Searching for Devices not in Manifest]"
+Format-SectionHeader -Title "TASK [Getting Auto Discovery Information]"
 $newDevices = @()
 
 try {
