@@ -35,7 +35,9 @@ $runtimeInfoScriptBlock = {
     $cwd = $using:cwd
 
     try {
-        $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
+        $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
+        $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
+        $commandsDirectory = Join-Path -Path $libDirectory -ChildPath "commands"
 
         Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
             . $_.FullName
@@ -54,7 +56,8 @@ $runtimeInfoScriptBlock = {
 
         $controlSystem = $device | Select-ControlSystem
         if ($controlSystem) {
-            $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $controlSystemRuntimeInfoCommands
+            $commands = Import-LocalizedData -FileName ControlSystemCommands -BaseDirectory $commandsDirectory
+            $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $commands
 
             $device | Add-Member RuntimeInfo $runtimeInfo
 
@@ -70,7 +73,8 @@ $runtimeInfoScriptBlock = {
 
         $touchPanel = $device | Select-TouchPanel
         if ($touchPanel) {
-            $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $touchPanelRuntimeInfoCommands
+            $commands = Import-LocalizedData -FileName TouchPanelCommands -BaseDirectory $commandsDirectory
+            $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $commands
 
             $device | Add-Member RuntimeInfo $runtimeInfo
 

@@ -36,7 +36,8 @@ $deviceInfoScriptBlock = {
     $cwd = $using:cwd
 
     try {
-        $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
+        $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
+        $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
 
         Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
             . $_.FullName
