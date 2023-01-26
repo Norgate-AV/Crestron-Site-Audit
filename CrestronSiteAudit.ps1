@@ -60,28 +60,14 @@ else {
 
 
 ################################################################################
-# Import the PSCrestron module
-################################################################################
-try {
-    $module = Join-Path -Path $cwd -ChildPath PSCrestron
-    if (Test-Path -Path $module) {
-        Import-Module $module
-    }
-    else {
-        Import-Module PSCrestron
-    }
-}
-catch {
-    Write-Console -Message "error: Failed to import PSCrestron => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
-    exit 1
-}
-
-
-################################################################################
-# Source utilities
+# Source library utilities
 ################################################################################
 try {
     $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
+
+    if (!(Test-Path -Path $utilsDirectory)) {
+        throw "Cannot find path '$utilsDirectory' because it does not exist."
+    }
 
     Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
         Write-Verbose "notice: Sourcing => $($_.FullName)"
@@ -89,41 +75,114 @@ try {
     }
 }
 catch {
-    Write-Console -Message "error: Failed to source utils => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    Write-Host "error: Failed to source library utilities => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
     exit 1
 }
 
 
 ################################################################################
-# Search for the environment file
+# Start pre-script checks
 ################################################################################
-$envFile = Find-Up -FileName ".env"
+Format-SectionHeader -Title "PRE-SCRIPT CHECKS"
 
-if ($envFile) {
-    Write-Verbose -Message "notice: Found environment file => $envFile"
+
+################################################################################
+# Import any local modules
+################################################################################
+$localModules = Get-ChildItem -Path $cwd | Select-LocalModule
+
+$localModules | ForEach-Object {
+    try {
+        Import-Module -Name $_.Name -Force -Verbose:$false
+    }
+    catch {
+        Write-Console -Message "error: Failed to import local module => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+        return
+    }
+
+    Write-Verbose "notice: Imported local module => $($_.Name)"
 }
-else {
-    Write-Console -Message "error: Failed to find environment file" -ForegroundColor Red
-    exit 1
-}
 
 
 ################################################################################
-# Get/Set environment variables
+# Get loaded and available modules
 ################################################################################
-try {
-    $envVariables = Get-EnvironmentFileVariableList -File $envFile
+$loadedModules = Get-Module
+$availableModules = Get-Module -ListAvailable -Verbose:$false
 
-    if ($envVariables) {
-        $envVariables | Foreach-Object {
-            [Environment]::SetEnvironmentVariable($_.Variable, $_.Value)
-        }
+
+################################################################################
+# Check the Crestron module is imported
+################################################################################
+$crestronModule = $loadedModules | Where-Object { $_.Name -like "*Crestron*" }
+
+if (!$crestronModule) {
+    Write-Verbose "notice: Crestron module is not loaded"
+    $crestronModule = $availableModules | Where-Object { $_.Name -like "*Crestron*" }
+
+    try {
+        Import-Module -Name $crestronModule.Name -Force -Verbose:$false
+    }
+    catch {
+        Write-Console -Message "error: Failed to import Crestron module => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+        Write-Console -Message "error: This script requires the Crestron module to be installed and imported." -ForegroundColor Red
+        Write-Console -Message "error: Please obtain and install the Crestron module and try again." -ForegroundColor Red
+        exit 1
     }
 }
+
+Write-Console -Message "ok: Crestron module is installed and imported" -ForegroundColor Green
+
+
+################################################################################
+# Check the PSDepend module is imported. Install and import if not.
+################################################################################
+$psDependModule = $loadedModules | Where-Object { $_.Name -like "*PSDepend*" }
+
+if (!$psDependModule) {
+    Write-Verbose "notice: PSDepend module is not loaded"
+    $psDependModule = $availableModules | Where-Object { $_.Name -like "*PSDepend*" }
+
+    if (!$psDependModule) {
+        Write-Verbose "notice: PSDepend is not installed."
+        Write-Verbose "notice: Installing now..."
+
+        try {
+            Install-Module -Name PSDepend -Force -Verbose:$false -Scope CurrentUser
+        }
+        catch {
+            Write-Console -Message "error: Failed to install PSDepend module => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+            exit 1
+        }
+
+        Write-Verbose "notice: PSDepend module installed"
+    }
+
+    Write-Verbose "notice: Importing PSDepend module"
+    try {
+        Import-Module -Name PSDepend -Force -Verbose:$false
+    }
+    catch {
+        Write-Console -Message "error: Failed to import PSDepend module => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+        exit 1
+    }
+}
+
+Write-Console "ok: PSDepend module is installed and imported" -ForegroundColor Green
+
+
+################################################################################
+# Invoke PSDepend to resolve dependencies
+################################################################################
+try {
+    Invoke-PSDepend -Force -Verbose:$false
+}
 catch {
-    Write-Console -Message "error: Failed to set environment variables => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    Write-Console -Message "error: PSDepend dependency resolution failed: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
     exit 1
 }
+
+Write-Console "ok: PSDepend dependencies resolved" -ForegroundColor Green
 
 
 ################################################################################
@@ -167,17 +226,58 @@ catch {
     exit 1
 }
 
-$devices = $manifest.devices
-$credentials = $manifest.credentials
-
 
 ################################################################################
 # Check there are devices to process
 ################################################################################
+$devices = $manifest.devices
+
 if (!$devices) {
     Write-Console -Message "error: No devices found in the manifest file '$ManifestFile'" -ForegroundColor Red
     exit 1
 }
+
+
+################################################################################
+# If there are credentials, check for an env file and set the variables
+################################################################################
+$credentials = $manifest.credentials
+
+if ($credentials) {
+    $envFile = Find-Up -FileName ".env"
+
+    if ($envFile) {
+        Write-Verbose -Message "notice: Found environment file => $envFile"
+    }
+    else {
+        Write-Console -Message "error: Failed to find environment file" -ForegroundColor Red
+        exit 1
+    }
+
+    try {
+        $envVariables = Get-EnvironmentFileVariableList -File $envFile
+        $envVariables | Foreach-Object {
+            [Environment]::SetEnvironmentVariable($_.Variable, $_.Value)
+        }
+    }
+    catch {
+        Write-Console -Message "error: Failed to set environment variables => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+        exit 1
+    }
+
+    if (!$env:AES_KEY) {
+        Write-Console -Message "error: The AES_KEY environment variable is not set" -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Console -Message "ok: Encryption key loaded" -ForegroundColor Green
+}
+
+
+################################################################################
+# Pre-script checks complete
+################################################################################
+Write-Console -Message "ok: Pre-script checks complete" -ForegroundColor Green
 
 
 ################################################################################
