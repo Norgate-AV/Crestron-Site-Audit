@@ -556,3 +556,15 @@ Set-HostForeGroundColour
 # Clean up
 ################################################################################
 Invoke-CleanUp
+
+
+################################################################################
+# Offer advice on next steps
+################################################################################
+Format-SectionHeader -Title "NEXT STEPS"
+Write-Console
+Write-Console -Message "1. Open the audit directory" -ForegroundColor Green
+Write-Console -Message "`t$($OutputDirectory)" -ForegroundColor Green
+Write-Console
+Write-Console -Message "2. Review the audit report" -ForegroundColor Green
+Write-Console -Message "`t$($outputFile)" -ForegroundColor Green
