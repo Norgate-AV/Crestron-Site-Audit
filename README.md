@@ -22,6 +22,7 @@ A PowerShell script to audit a Crestron Site.
     -   [Creating a Manifest File](#creating-a-manifest-file)
 -   [Usage :zap:](#usage-zap)
 -   [Team :soccer:](#team-soccer)
+-   [Contributing :sparkles:](#contributing-sparkles)
 -   [LICENSE :balance_scale:](#license-balance_scale)
 
 ## Features :white_check_mark:
@@ -112,6 +113,12 @@ This project is maintained by the following person(s) and a bunch of [awesome co
     <td align="center"><a href="https://github.com/damienbutt"><img src="https://avatars.githubusercontent.com/damienbutt?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Damien Butt</b></sub></a><br /></td>
   </tr>
 </table>
+
+## Contributing :sparkles:
+
+Contributions of any kind are welcome!
+
+Check out the [contributing guide](CONTRIBUTING.md) for more information.
 
 ## LICENSE :balance_scale:
 
