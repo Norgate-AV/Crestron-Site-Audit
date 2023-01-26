@@ -67,7 +67,8 @@ else {
 # Source library utilities
 ################################################################################
 try {
-    $utilsDirectory = Join-Path -Path $cwd -ChildPath "lib"
+    $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
+    $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
 
     if (!(Test-Path -Path $utilsDirectory)) {
         throw "Cannot find path '$utilsDirectory' because it does not exist."
@@ -88,6 +89,73 @@ catch {
 # Start pre-script checks
 ################################################################################
 Format-SectionHeader -Title "PRE-SCRIPT CHECKS"
+
+
+################################################################################
+# Check scriptblock files exist
+################################################################################
+try {
+    $scriptBlockDirectory = Join-Path -Path $libDirectory -ChildPath "scriptblocks"
+
+    if (!(Test-Path -Path $scriptBlockDirectory)) {
+        throw "Cannot find path '$scriptBlockDirectory' because it does not exist."
+    }
+
+    $getDeviceInfoScriptBlock = Join-Path -Path $scriptBlockDirectory -ChildPath "GetDeviceInfo.ps1"
+    $getDeviceRuntimeInfoScriptBlock = Join-Path -Path $scriptBlockDirectory -ChildPath "GetDeviceRuntimeInfo.ps1"
+    $getDeviceFilesScriptBlock = Join-Path -Path $scriptBlockDirectory -ChildPath "GetDeviceFiles.ps1"
+    $getDeviceAutoDiscoveryScriptBlock = Join-Path -Path $scriptBlockDirectory -ChildPath "GetDeviceAutoDiscovery.ps1"
+
+    $files = @(
+        $getDeviceInfoScriptBlock,
+        $getDeviceRuntimeInfoScriptBlock,
+        $getDeviceFilesScriptBlock,
+        $getDeviceAutoDiscoveryScriptBlock
+    )
+
+    $files | ForEach-Object {
+        if (!(Test-Path -Path $_)) {
+            throw "Cannot find path '$_' because it does not exist."
+        }
+    }
+
+    Write-Console -Message "ok: All required scriptblock files exist" -ForegroundColor Green
+}
+catch {
+    Write-Host "error: Failed checking scriptblock files exist => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    exit 1
+}
+
+
+################################################################################
+# Check command files exist
+################################################################################
+try {
+    $commandsDirectory = Join-Path -Path $libDirectory -ChildPath "commands"
+
+    if (!(Test-Path -Path $commandsDirectory)) {
+        throw "Cannot find path '$commandsDirectory' because it does not exist."
+    }
+
+    $files = @(
+        "ControlSystemCommands.psd1",
+        "TouchPanelCommands.psd1"
+    )
+
+    $files | ForEach-Object {
+        $file = Join-Path -Path $commandsDirectory -ChildPath $_
+
+        if (!(Test-Path -Path $file)) {
+            throw "Cannot find path '$file' because it does not exist."
+        }
+    }
+
+    Write-Console -Message "ok: All command files exist" -ForegroundColor Green
+}
+catch {
+    Write-Host "error: Failed checking command files exist => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    exit 1
+}
 
 
 ################################################################################
@@ -309,9 +377,14 @@ Format-SectionHeader -Title "TASK [Getting Device Information]"
 $deviceInfo = @()
 
 try {
+    $scriptPath = $getDeviceInfoScriptBlock
+    $script = Get-Content -Path $scriptPath -Raw -ErrorAction Stop
+
+    $name = (Split-Path -Path $scriptPath -Leaf).Replace(".ps1", "")
+
     $runspaceJobParams = @{
-        Name            = { "DeviceInfo-[$($_.address)]" }
-        ScriptBlock     = $deviceInfoScriptBlock
+        Name            = { "$name-[$($_.address)]" }
+        ScriptBlock     = [ScriptBlock]::Create($script)
         Throttle        = 50
         ModulesToImport = @("PSCrestron")
     }
@@ -397,9 +470,14 @@ if ($touchPanels) {
 Format-SectionHeader -Title "TASK [Getting Runtime Information]"
 
 try {
+    $scriptPath = $getDeviceRuntimeInfoScriptBlock
+    $script = Get-Content -Path $scriptPath -Raw -ErrorAction Stop
+
+    $name = (Split-Path -Path $scriptPath -Leaf).Replace(".ps1", "")
+
     $runspaceJobParams = @{
-        Name            = { "RuntimeInfo-[$($_.Device)]" }
-        ScriptBlock     = $runtimeInfoScriptBlock
+        Name            = { "$name-[$($_.Device)]" }
+        ScriptBlock     = [ScriptBlock]::Create($script)
         Throttle        = 50
         ModulesToImport = @("PSCrestron")
     }
@@ -433,9 +511,14 @@ if ($BackupDeviceFiles) {
     Format-SectionHeader -Title "TASK [Backing up Device Files]"
 
     try {
+        $scriptPath = $getDeviceFilesScriptBlock
+        $script = Get-Content -Path $scriptPath -Raw -ErrorAction Stop
+
+        $name = (Split-Path -Path $scriptPath -Leaf).Replace(".ps1", "")
+
         $runspaceJobParams = @{
-            Name            = { "DeviceFiles-[$($_.Device)]" }
-            ScriptBlock     = $deviceFilesScriptBlock
+            Name            = { "$name-[$($_.Device)]" }
+            ScriptBlock     = [ScriptBlock]::Create($script)
             Throttle        = 50
             ModulesToImport = @("PSCrestron")
         }
@@ -468,9 +551,14 @@ Format-SectionHeader -Title "TASK [Searching for Devices not in Manifest]"
 $newDevices = @()
 
 try {
+    $scriptPath = $getDeviceAutoDiscoveryScriptBlock
+    $script = Get-Content -Path $scriptPath -Raw -ErrorAction Stop
+
+    $name = (Split-Path -Path $scriptPath -Leaf).Replace(".ps1", "")
+
     $runspaceJobParams = @{
-        Name            = { "DeviceSearch-[$($_.Device)]" }
-        ScriptBlock     = $deviceSearchScriptBlock
+        Name            = { "$name-[$($_.Device)]" }
+        ScriptBlock     = [ScriptBlock]::Create($script)
         Throttle        = 50
         ModulesToImport = @("PSCrestron")
     }

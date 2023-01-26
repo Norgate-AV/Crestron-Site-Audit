@@ -29,35 +29,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$deviceSearchScriptBlock = {
-    $device = $_
+$device = $_
 
-    $cwd = $using:cwd
+$cwd = $using:cwd
 
-    try {
-        $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
-        $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
+try {
+    $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
+    $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
 
-        Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-            . $_.FullName
-        }
-
-        if ($device.ErrorMessage) {
-            throw $device.ErrorMessage
-        }
-
-        $deviceParams = @{
-            Device   = $device.IPAddress
-            Secure   = $device.Secure
-            Username = $device.Credential.Username
-            Password = $device.Credential.Password
-        }
-
-        $discoveredDevices = Read-AutoDiscovery @deviceParams
-        $device | Add-Member DiscoveredDevices $discoveredDevices
+    Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
+        . $_.FullName
     }
-    catch {}
-    finally {
-        $device
+
+    if ($device.ErrorMessage) {
+        throw $device.ErrorMessage
     }
+
+    $device | Get-DeviceFiles -OutputDirectory $device.DeviceDirectory
+}
+catch {}
+finally {
+    $device
 }
