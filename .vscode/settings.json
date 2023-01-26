@@ -21,7 +21,7 @@
         "**/*.AXW": true,
         "**/*.mf": true,
         "node_modules": true,
-        "**/.psdepend": true
+        "**/.psdepend": false
     },
     "markdownlint.config": {
         // "default": true,
@@ -49,6 +49,6 @@
     "powershell.scriptAnalysis.settingsPath": "PSScriptAnalysisSettings.psd1",
     "dotenv.enableAutocloaking": true,
     "[powershell]": {
-        "editor.defaultFormatter": "ms-vscode.powershell-preview"
+        "editor.defaultFormatter": "ms-vscode.powershell"
     }
 }
