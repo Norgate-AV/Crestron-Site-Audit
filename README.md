@@ -17,23 +17,88 @@ A PowerShell script to audit a Crestron Site.
 
 ## Contents :book:
 
--   [Features :package:](#features-package)
--   [Usage :rocket:](#usage-rocket)
+-   [Features :white_check_mark:](#features-white_check_mark)
+-   [Getting Started :rocket:](#getting-started-rocket)
+    -   [Credential Encryption](#credential-encryption)
+    -   [Creating a Manifest File](#creating-a-manifest-file)
+-   [Usage :zap:](#usage-zap)
 -   [Team :soccer:](#team-soccer)
 -   [LICENSE :balance_scale:](#license-balance_scale)
 
-## Features :package:
+## Features :white_check_mark:
 
--   Device Version Information
--   Device Program Information
--   Device IP Table Information
--   Device Cresnet Information
--   Device Control Subnet Information
--   Device AutoDiscovery Information
--   Device Runtime Information
--   Optional: Device File Backup
+-   ✅ Device Version Information
+-   ✅ Device Program Information
+-   ✅ Device IP Table Information
+-   ✅ Device Cresnet Information
+-   ✅ Device Control Subnet Information
+-   ✅ Device AutoDiscovery Information
+-   ✅ Device Runtime Information
+-   ✅ Optional: Device File Backup
 
-## Usage :rocket:
+## Getting Started :rocket:
+
+### Credential Encryption
+
+Credentials are encrypted using AES256. You must first create a key. This key is used to encrypt and decrypt the credentials. The key is not stored in the manifest file. The key must be stored in a `.env` file in the same directory as the script. The key must be stored in the `AES_KEY` variable. A sample file, `.env.sample` is provided in the repository.
+
+#### 1. Copy sample file to `.env`
+
+```bash
+cp .env.sample .env
+```
+
+#### 2. Create and enter AES key
+
+```bash
+AES_KEY=cowbell
+```
+
+The longer and more complex the key, the better.
+
+#### 3. Keep the `.env` file secret
+
+The `.env` file should be kept secret. It should not be committed to source control. It's recommended to add the file to your `.gitignore` file.
+
+### Creating a Manifest File
+
+Create a manifest file with the following format:
+
+```json
+{
+    "credentials": [
+        {
+            "id": "guid",
+            "name": "Friendly Name",
+            "credential": "Aes256 Encrypted Credential"
+        },
+        {
+            "id": "guid",
+            "name": "Friendly Name",
+            "credential": "Aes256 Encrypted Credential"
+        }
+    ],
+    "devices": [
+        {
+            "address": "10.0.1.10",
+            "secure": true,
+            "credentialId": "guid"
+        },
+        {
+            "address": "dev-hostname-02",
+            "secure": false,
+            "credentialId": ""
+        },
+        {
+            "address": "dev-hostname-03",
+            "secure": true,
+            "credentialId": "guid"
+        }
+    ]
+}
+```
+
+## Usage :zap:
 
 ```powershell
 .\Crestron-Site-Audit.ps1
