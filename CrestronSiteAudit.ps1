@@ -377,13 +377,10 @@ Format-SectionHeader -Title "TASK [Getting Device Information]"
 $deviceInfo = @()
 
 try {
-    $scriptPath = $getDeviceInfoScriptBlock
-    $script = Get-Content -Path $scriptPath -Raw -ErrorAction Stop
-
-    $name = (Split-Path -Path $scriptPath -Leaf).Replace(".ps1", "")
+    $script = Get-Content -Path $getDeviceInfoScriptBlock -Raw -ErrorAction Stop
 
     $runspaceJobParams = @{
-        Name            = { "$name-[$($_.address)]" }
+        Name            = { "GetDeviceInfo-[$($_.address)]" }
         ScriptBlock     = [ScriptBlock]::Create($script)
         Throttle        = 50
         ModulesToImport = @("PSCrestron")
@@ -470,13 +467,10 @@ if ($touchPanels) {
 Format-SectionHeader -Title "TASK [Getting Runtime Information]"
 
 try {
-    $scriptPath = $getDeviceRuntimeInfoScriptBlock
-    $script = Get-Content -Path $scriptPath -Raw -ErrorAction Stop
-
-    $name = (Split-Path -Path $scriptPath -Leaf).Replace(".ps1", "")
+    $script = Get-Content -Path $getDeviceRuntimeInfoScriptBlock -Raw -ErrorAction Stop
 
     $runspaceJobParams = @{
-        Name            = { "$name-[$($_.Device)]" }
+        Name            = { "GetDeviceRuntimeInfo-[$($_.Device)]" }
         ScriptBlock     = [ScriptBlock]::Create($script)
         Throttle        = 50
         ModulesToImport = @("PSCrestron")
@@ -511,13 +505,10 @@ if ($BackupDeviceFiles) {
     Format-SectionHeader -Title "TASK [Backing up Device Files]"
 
     try {
-        $scriptPath = $getDeviceFilesScriptBlock
-        $script = Get-Content -Path $scriptPath -Raw -ErrorAction Stop
-
-        $name = (Split-Path -Path $scriptPath -Leaf).Replace(".ps1", "")
+        $script = Get-Content -Path $getDeviceFilesScriptBlock -Raw -ErrorAction Stop
 
         $runspaceJobParams = @{
-            Name            = { "$name-[$($_.Device)]" }
+            Name            = { "GetDeviceFiles-[$($_.Device)]" }
             ScriptBlock     = [ScriptBlock]::Create($script)
             Throttle        = 50
             ModulesToImport = @("PSCrestron")
@@ -551,13 +542,10 @@ Format-SectionHeader -Title "TASK [Searching for Devices not in Manifest]"
 $newDevices = @()
 
 try {
-    $scriptPath = $getDeviceAutoDiscoveryScriptBlock
-    $script = Get-Content -Path $scriptPath -Raw -ErrorAction Stop
-
-    $name = (Split-Path -Path $scriptPath -Leaf).Replace(".ps1", "")
+    $script = Get-Content -Path $getDeviceAutoDiscoveryScriptBlock -Raw -ErrorAction Stop
 
     $runspaceJobParams = @{
-        Name            = { "$name-[$($_.Device)]" }
+        Name            = { "GetDeviceAutoDiscovery-[$($_.Device)]" }
         ScriptBlock     = [ScriptBlock]::Create($script)
         Throttle        = 50
         ModulesToImport = @("PSCrestron")
