@@ -44,7 +44,11 @@ param(
 
     [Parameter(Mandatory = $false)]
     [switch]
-    $BackupDeviceFiles = $false
+    $BackupDeviceFiles = $false,
+
+    [Parameter(Mandatory = $false)]
+    [switch]
+    $LogsOnly = $false
 )
 
 
