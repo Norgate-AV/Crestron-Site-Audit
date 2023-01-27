@@ -566,7 +566,7 @@ try {
         $discoveredDevicesFile = Join-Path -Path $_.DeviceDirectory -ChildPath "DiscoveredDevices.xlsx"
         $_.DiscoveredDevices | Export-Excel -Path $discoveredDevicesFile -FreezeTopRow -AutoSize -Append
 
-        $newDevices += $_.DiscoveredDevices | Where-Object { $_.Hostname -notin $deviceInfo.Hostname }
+        $newDevices += $_.DiscoveredDevices | Where-Object { $_.Hostname -notin $deviceInfo.Hostname -and $_.Hostname -notin $newDevices.Hostname }
     }
 }
 catch {
