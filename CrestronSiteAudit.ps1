@@ -318,13 +318,12 @@ $credentials = $manifest.credentials
 if ($credentials) {
     $envFile = Find-Up -FileName ".env"
 
-    if ($envFile) {
-        Write-Verbose -Message "notice: Found environment file => $envFile"
-    }
-    else {
+    if (!$envFile) {
         Write-Console -Message "error: Failed to find environment file" -ForegroundColor Red
         exit 1
     }
+
+    Write-Verbose -Message "notice: Found environment file => $envFile"
 
     try {
         $envVariables = Get-EnvironmentFileVariableList -File $envFile
