@@ -375,17 +375,20 @@ Write-Console -ForegroundColor Green -Message "Audit File => $outputFile"
 Format-SectionHeader -Title "TASK [Getting Device Information]"
 $deviceInfo = @()
 
+$commonJobParams = @{
+    Throttle        = 50
+    ModulesToImport = @($crestronModule.Name)
+}
+
 try {
     $script = Get-Content -Path $getDeviceInfoScriptBlock -Raw -ErrorAction Stop
 
-    $runspaceJobParams = @{
-        Name            = { "GetDeviceInfo-[$($_.address)]" }
-        ScriptBlock     = [ScriptBlock]::Create($script)
-        Throttle        = 50
-        ModulesToImport = @("PSCrestron")
+    $thisJobParams = @{
+        Name        = { "GetDeviceInfo-[$($_.address)]" }
+        ScriptBlock = [ScriptBlock]::Create($script)
     }
 
-    $devices | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
+    $devices | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
         $errorMessage = $_.ErrorMessage
 
         if ($errorMessage) {
@@ -468,14 +471,12 @@ Format-SectionHeader -Title "TASK [Getting Runtime Information]"
 try {
     $script = Get-Content -Path $getDeviceRuntimeInfoScriptBlock -Raw -ErrorAction Stop
 
-    $runspaceJobParams = @{
-        Name            = { "GetDeviceRuntimeInfo-[$($_.Device)]" }
-        ScriptBlock     = [ScriptBlock]::Create($script)
-        Throttle        = 50
-        ModulesToImport = @("PSCrestron")
+    $thisJobParams = @{
+        Name        = { "GetDeviceRuntimeInfo-[$($_.Device)]" }
+        ScriptBlock = [ScriptBlock]::Create($script)
     }
 
-    $deviceInfo | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
+    $deviceInfo | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
         $errorMessage = $_.RuntimeInfo.ErrorMessage
 
         if ($errorMessage) {
@@ -506,14 +507,12 @@ if ($BackupDeviceFiles) {
     try {
         $script = Get-Content -Path $getDeviceFilesScriptBlock -Raw -ErrorAction Stop
 
-        $runspaceJobParams = @{
-            Name            = { "GetDeviceFiles-[$($_.Device)]" }
-            ScriptBlock     = [ScriptBlock]::Create($script)
-            Throttle        = 50
-            ModulesToImport = @("PSCrestron")
+        $thisJobParams = @{
+            Name        = { "GetDeviceFiles-[$($_.Device)]" }
+            ScriptBlock = [ScriptBlock]::Create($script)
         }
 
-        $deviceInfo | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
+        $deviceInfo | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
             $errorMessage = $_.ErrorMessage
 
             if ($errorMessage) {
@@ -543,14 +542,12 @@ $newDevices = @()
 try {
     $script = Get-Content -Path $getDeviceAutoDiscoveryScriptBlock -Raw -ErrorAction Stop
 
-    $runspaceJobParams = @{
-        Name            = { "GetDeviceAutoDiscovery-[$($_.Device)]" }
-        ScriptBlock     = [ScriptBlock]::Create($script)
-        Throttle        = 50
-        ModulesToImport = @("PSCrestron")
+    $thisJobParams = @{
+        Name        = { "GetDeviceAutoDiscovery-[$($_.Device)]" }
+        ScriptBlock = [ScriptBlock]::Create($script)
     }
 
-    $controlSystems | Where-Object { $_.Series -ge 3 } | Start-RSJob @runspaceJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
+    $controlSystems | Where-Object { $_.Series -ge 3 } | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
         if (!$_.DiscoveredDevices) {
             Write-Console -Message "error: [$($_.Device)] => Failed to read autodiscovery" -ForegroundColor Red
             return
