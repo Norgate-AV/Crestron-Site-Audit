@@ -150,7 +150,7 @@ try {
         }
     }
 
-    Write-Console -Message "ok: All command files exist" -ForegroundColor Green
+    Write-Console -Message "ok: All required command files exist" -ForegroundColor Green
 }
 catch {
     Write-Host "error: Failed checking command files exist => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
