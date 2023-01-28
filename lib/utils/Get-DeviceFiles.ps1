@@ -40,7 +40,8 @@ function Get-DeviceFiles {
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $OutputDirectory
+        [string]
+        $OutputDirectory
     )
 
     begin {}
