@@ -4,7 +4,7 @@
     "ImportExcel"   = "7.8.4"
 
     PSDependOptions = @{
-        Target    = ".psdepend"
+        Target    = '$DependencyPath/.psdepend'
         AddToPath = $true
     }
 }

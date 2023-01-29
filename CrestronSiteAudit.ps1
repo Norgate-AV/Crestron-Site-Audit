@@ -53,21 +53,10 @@ param(
 
 
 ################################################################################
-# Get the current working directory
-################################################################################
-if ($PSScriptRoot) {
-    $cwd = $PSScriptRoot
-}
-else {
-    $cwd = $PWD
-}
-
-
-################################################################################
 # Source library utilities
 ################################################################################
 try {
-    $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
+    $libDirectory = Join-Path -Path $PSScriptRoot -ChildPath "lib"
     $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
 
     if (!(Test-Path -Path $utilsDirectory)) {
@@ -161,11 +150,13 @@ catch {
 ################################################################################
 # Import any local modules
 ################################################################################
-$localModules = Get-ChildItem -Path $cwd | Select-LocalModule
+$localModules = @()
+$localModules += Get-ChildItem -Path $PWD | Select-LocalModule
+$localModules += Get-ChildItem -Path $PSScriptRoot | Select-LocalModule
 
 $localModules | ForEach-Object {
     try {
-        Import-Module -Name $_.Name -Force -Verbose:$false
+        Import-Module -Name $_.FullName -Force -Verbose:$false
     }
     catch {
         Write-Console -Message "error: Failed to import local module => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
@@ -247,7 +238,7 @@ Write-Console "ok: PSDepend module is installed and imported" -ForegroundColor G
 # Invoke PSDepend to resolve dependencies
 ################################################################################
 try {
-    Invoke-PSDepend -Path $cwd -Force -Verbose:$false
+    Invoke-PSDepend -Path $PSScriptRoot -Force -Verbose:$false
 }
 catch {
     Write-Console -Message "error: PSDepend dependency resolution failed: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
@@ -280,7 +271,7 @@ if (!(Test-Path -Path $ManifestFile -PathType "Leaf")) {
 $timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
 if (!$OutputDirectory) {
-    $OutputDirectory = Join-Path -Path $cwd -ChildPath $timestamp
+    $OutputDirectory = Join-Path -Path $PWD -ChildPath $timestamp
 
     Write-Verbose -Message "No output directory specified, using '$OutputDirectory'"
     Write-Verbose -Message "Use the -OutputDirectory parameter to specify an output directory"
@@ -329,7 +320,7 @@ if ($credentials) {
         exit 1
     }
 
-    Write-Verbose -Message "notice: Found environment file => $envFile"
+    Write-Console -Message "ok: Found environment file => $envFile" -ForegroundColor Green
 
     try {
         $envVariables = Get-EnvironmentFileVariableList -File $envFile

@@ -32,7 +32,7 @@ SOFTWARE.
 $device = $_
 
 $credentials = $using:credentials
-$cwd = $using:cwd
+$cwd = $using:PSScriptRoot
 
 try {
     $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
