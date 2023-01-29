@@ -444,6 +444,19 @@ if ($controlSystems) {
 
 
 ################################################################################
+# Filter Control Systems by Series
+################################################################################
+$2SeriesControlSystems = @()
+$2SeriesControlSystems += $controlSystems | Where-Object { $_.Series -eq $Series.Series2 }
+
+$3SeriesControlSystems = @()
+$3SeriesControlSystems += $controlSystems | Where-Object { $_.Series -eq $Series.Series3 }
+
+$4SeriesControlSystems = @()
+$4SeriesControlSystems += $controlSystems | Where-Object { $_.Series -eq $Series.Series4 }
+
+
+################################################################################
 # Filter Touch Panels
 ################################################################################
 $touchPanels = @()
@@ -501,31 +514,41 @@ finally {
 if ($BackupDeviceFiles) {
     Format-SectionHeader -Title "TASK [Backing up Device Files]"
 
-    try {
-        $script = Get-Content -Path $getDeviceFilesScriptBlock -Raw -ErrorAction Stop
+    $devicesToBackup = @()
+    $devicesToBackup += $3SeriesControlSystems
+    $devicesToBackup += $4SeriesControlSystems
+    $devicesToBackup += $touchPanels
 
-        $thisJobParams = @{
-            Name        = { "GetDeviceFiles-[$($_.Device)]" }
-            ScriptBlock = [ScriptBlock]::Create($script)
-        }
+    if ($devicesToBackup) {
+        try {
+            $script = Get-Content -Path $getDeviceFilesScriptBlock -Raw -ErrorAction Stop
 
-        $deviceInfo | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
-            $errorMessage = $_.ErrorMessage
-
-            if ($errorMessage) {
-                Write-Console -Message "error: [$($_.Device)] => $errorMessage" -ForegroundColor Red
-                return
+            $thisJobParams = @{
+                Name        = { "GetDeviceFiles-[$($_.Device)]" }
+                ScriptBlock = [ScriptBlock]::Create($script)
             }
 
-            Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
+            $devicesToBackup | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
+                $errorMessage = $_.ErrorMessage
+
+                if ($errorMessage) {
+                    Write-Console -Message "error: [$($_.Device)] => $errorMessage" -ForegroundColor Red
+                    return
+                }
+
+                Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
+            }
+        }
+        catch {
+            Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+        }
+        finally {
+            Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
+            Get-RSJob | Remove-RSJob
         }
     }
-    catch {
-        Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
-    }
-    finally {
-        Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
-        Get-RSJob | Remove-RSJob
+    else {
+        Write-Console -Message "notice: There are no compatible devices to backup" -ForegroundColor Yellow
     }
 }
 
@@ -544,7 +567,7 @@ try {
         ScriptBlock = [ScriptBlock]::Create($script)
     }
 
-    $controlSystems | Where-Object { $_.Series -ge 3 } | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
+    $controlSystems | Where-Object { $_.Series -ge $Series.Series3 } | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
         if (!$_.DiscoveredDevices) {
             Write-Console -Message "error: [$($_.Device)] => Failed to read autodiscovery" -ForegroundColor Red
             return
