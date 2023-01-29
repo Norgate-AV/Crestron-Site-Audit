@@ -260,7 +260,13 @@ Write-Console "ok: PSDepend dependencies resolved" -ForegroundColor Green
 ################################################################################
 # Check the manifest file exists
 ################################################################################
-$ManifestFile = Resolve-Path -Path $ManifestFile
+try {
+    $ManifestFile = Resolve-Path -Path $ManifestFile -ErrorAction Stop
+}
+catch {
+    Write-Console -Message "error: Failed to resolve the manifest file path => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
+    exit 1
+}
 
 if (!(Test-Path -Path $ManifestFile -PathType "Leaf")) {
     Write-Console -Message "error: The manifest file '$ManifestFile' does not exist" -ForegroundColor Red
