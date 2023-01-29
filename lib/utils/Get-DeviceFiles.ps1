@@ -41,7 +41,11 @@ function Get-DeviceFiles {
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]
-        $OutputDirectory
+        $OutputDirectory,
+
+        [Parameter(Mandatory = $false)]
+        [switch]
+        $LogsOnly = $false
     )
 
     begin {}
@@ -63,6 +67,10 @@ function Get-DeviceFiles {
         }
         catch {
             return
+        }
+
+        if ($LogsOnly) {
+            $entities = $entities | Where-Object { $_.Directory -and $_.Name -match 'p?logs?' }
         }
 
         $entities | ForEach-Object {

@@ -32,6 +32,7 @@ SOFTWARE.
 $device = $_
 
 $cwd = $using:PSScriptRoot
+$logsOnly = $using:LogsOnly
 
 try {
     $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
@@ -45,7 +46,7 @@ try {
         throw $device.ErrorMessage
     }
 
-    $device | Get-DeviceFiles -OutputDirectory $device.DeviceDirectory
+    $device | Get-DeviceFiles -OutputDirectory $device.DeviceDirectory -LogsOnly:$logsOnly
 }
 catch {}
 finally {
