@@ -18,8 +18,9 @@ A PowerShell script to audit a Crestron Site.
 
 -   [Features :white_check_mark:](#features-white_check_mark)
 -   [Getting Started :rocket:](#getting-started-rocket)
-    -   [Credential Encryption](#credential-encryption)
-    -   [Creating a Manifest File](#creating-a-manifest-file)
+    -   [Prerequisites](#prerequisites)
+    -   [Create Encryption Key](#create-encryption-key)
+    -   [Create Manifest File](#create-manifest-file)
 -   [Usage :zap:](#usage-zap)
 -   [Team :soccer:](#team-soccer)
 -   [Contributing :sparkles:](#contributing-sparkles)
@@ -38,7 +39,9 @@ A PowerShell script to audit a Crestron Site.
 
 ## Getting Started :rocket:
 
-### Credential Encryption
+### Prerequisites
+
+### Create Encryption Key
 
 Credentials are encrypted using AES256. You must first create a key. This key is used to encrypt and decrypt the credentials. The key is not stored in the manifest file. The key must be stored in a `.env` file in the same directory as the script. The key must be stored in the `AES_KEY` variable. A sample file, `.env.sample` is provided in the repository.
 
@@ -60,7 +63,7 @@ The longer and more complex the key, the better.
 
 The `.env` file should be kept secret. It should not be committed to source control. It's recommended to add the file to your `.gitignore` file.
 
-### Creating a Manifest File
+### Create Manifest File
 
 Create a manifest file with the following format:
 
