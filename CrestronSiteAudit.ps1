@@ -583,7 +583,6 @@ finally {
 ################################################################################
 # Report on new devices
 ################################################################################
-Write-Console
 Format-SectionHeader -Title "DISCOVERED DEVICES"
 if ($newDevices) {
     Set-HostForeGroundColour -Colour Green
