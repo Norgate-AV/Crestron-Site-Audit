@@ -101,7 +101,7 @@ Create a manifest file with the following format:
 ## Usage :zap:
 
 ```powershell
-.\Crestron-Site-Audit.ps1
+.\CrestronSiteAudit.ps1
 ```
 
 ## Team :soccer:
