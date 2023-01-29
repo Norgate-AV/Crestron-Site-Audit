@@ -8,7 +8,7 @@
 
 [![CI](https://github.com/Norgate-AV-Solutions-Ltd/CRestron-Site-Audit/actions/workflows/main.yml/badge.svg)](https://github.com/Norgate-AV-Solutions-Ltd/Crestron-Site-Audit/actions)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
-[![GitHub contributors](https://img.shields.io/github/contributors/Norgate-AV-Solutions-Ltd/Crestron-Site-Audit)](#contributors)
+[![GitHub contributors](https://img.shields.io/github/contributors/Norgate-AV-Solutions-Ltd/Crestron-Site-Audit)](https://github.com/Norgate-AV-Solutions-Ltd/Crestron-Site-Audit/graphs/contributors)
 
 ---
 
