@@ -585,16 +585,17 @@ finally {
 ################################################################################
 Format-SectionHeader -Title "DISCOVERED DEVICES"
 if ($newDevices) {
-    Set-HostForeGroundColour -Colour Green
+    Set-HostForeGroundColour -Colour Yellow
     $newDevices | Format-Table
     Set-HostForeGroundColour
 
-    Write-Console -Message "New Devices Found: $($newDevices.Count)" -ForegroundColor Green
+    Write-Console -Message "notice: New Devices Found: $($newDevices.Count)" -ForegroundColor Yellow
+    Write-Console -Message "notice: These devices have not been audited because they are not included in the manifest" -ForegroundColor Yellow
     $newDevicesFile = Join-Path -Path $OutputDirectory -ChildPath "NewDevices.xlsx"
     $newDevices | Export-Excel -Path $newDevicesFile -FreezeTopRow -AutoSize -Append
 }
 else {
-    Write-Console -Message "No new devices discovered" -ForegroundColor Green
+    Write-Console -Message "ok: No new devices discovered" -ForegroundColor Green
 }
 
 
