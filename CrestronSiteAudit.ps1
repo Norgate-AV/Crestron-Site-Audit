@@ -247,7 +247,7 @@ Write-Console "ok: PSDepend module is installed and imported" -ForegroundColor G
 # Invoke PSDepend to resolve dependencies
 ################################################################################
 try {
-    Invoke-PSDepend -Force -Verbose:$false
+    Invoke-PSDepend -Path $cwd -Force -Verbose:$false
 }
 catch {
     Write-Console -Message "error: PSDepend dependency resolution failed: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
