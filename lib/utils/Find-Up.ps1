@@ -39,21 +39,20 @@ function Find-Up {
         $FileName,
 
         [Parameter(Mandatory = $false)]
-        [ValidateNotNullOrEmpty()]
         [string]
-        $Path = $PSScriptRoot
+        $Path = $PWD
     )
 
-    $path = Resolve-Path -Path $Path
+    $Path = Resolve-Path -Path $Path
 
-    while ($path) {
-        $file = Join-Path -Path $path -ChildPath $FileName
+    while ($Path) {
+        $file = Join-Path -Path $Path -ChildPath $FileName
 
         if (Test-Path -Path $file) {
             return $file
         }
 
-        $path = Split-Path -Path $path -Parent
+        $Path = Split-Path -Path $Path -Parent
     }
 
     return $null
