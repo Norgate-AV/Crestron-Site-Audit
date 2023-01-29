@@ -31,6 +31,8 @@ SOFTWARE.
 
 [CmdletBinding()]
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'LogsOnly', Justification = 'Referenced in scriptblock.')]
+
 param(
     [Parameter(Mandatory = $false)]
     [string]
