@@ -33,6 +33,11 @@ $device = $_
 
 $cwd = $using:PSScriptRoot
 
+$result = @{
+    Device    = $device
+    Exception = $null
+}
+
 try {
     $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
     $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
@@ -43,7 +48,7 @@ try {
     }
 
     if ($device.ErrorMessage) {
-        throw $device.ErrorMessage
+        return $result
     }
 
     $deviceParams = @{
@@ -56,12 +61,10 @@ try {
     $controlSystem = $device | Select-ControlSystem
     if ($controlSystem) {
         $commands = Import-LocalizedData -FileName ControlSystemCommands -BaseDirectory $commandsDirectory
-        $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $commands
+        $runtimeInfoResult = $device | Get-DeviceRuntimeInfo -Commands $commands
 
-        $device | Add-Member RuntimeInfo $runtimeInfo
-
-        if ($runtimeInfo.ErrorMessage) {
-            throw $runtimeInfo.ErrorMessage
+        if (!$runtimeInfoResult.Exception) {
+            $device | Add-Member RuntimeInfo $runtimeInfoResult.RuntimeInfo
         }
 
         $cresnetInfo = Get-CresnetInfo @deviceParams
@@ -73,12 +76,10 @@ try {
     $touchPanel = $device | Select-TouchPanel
     if ($touchPanel) {
         $commands = Import-LocalizedData -FileName TouchPanelCommands -BaseDirectory $commandsDirectory
-        $runtimeInfo = $device | Get-DeviceRuntimeInfo -Commands $commands
+        $runtimeInfoResult = $device | Get-DeviceRuntimeInfo -Commands $commands
 
-        $device | Add-Member RuntimeInfo $runtimeInfo
-
-        if ($runtimeInfo.ErrorMessage) {
-            throw $runtimeInfo.ErrorMessage
+        if (!$runtimeInfoResult.Exception) {
+            $device | Add-Member RuntimeInfo $runtimeInfoResult.RuntimeInfo
         }
     }
 
@@ -99,8 +100,12 @@ try {
     if ($ipTableInfo) {
         $device | Add-Member IPTableInfo ($ipTableInfo | Sort-Object -Property CIPId)
     }
+
+    $result.Device = $device
 }
-catch {}
+catch {
+    $result.Exception = $_.Exception
+}
 finally {
-    $device
+    $result
 }

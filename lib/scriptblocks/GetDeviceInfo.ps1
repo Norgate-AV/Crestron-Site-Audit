@@ -34,6 +34,12 @@ $device = $_
 $credentials = $using:credentials
 $cwd = $using:PSScriptRoot
 
+$result = @{
+    Device     = $device
+    Exception  = $null
+    DeviceInfo = $null
+}
+
 try {
     $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
     $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
@@ -58,7 +64,8 @@ try {
     $versionInfo | Add-Member Secure $device.secure
 
     if ($versionInfo.ErrorMessage) {
-        throw $versionInfo.ErrorMessage
+        $result.DeviceInfo = $versionInfo
+        return $result
     }
 
     $controlSystem = $versionInfo | Select-ControlSystem
@@ -85,8 +92,12 @@ try {
             $versionInfo | Add-Member $property.Name $property.Value
         }
     }
+
+    $result.DeviceInfo = $versionInfo
 }
-catch {}
+catch {
+    $result.Exception = $_.Exception
+}
 finally {
-    $versionInfo
+    $result
 }

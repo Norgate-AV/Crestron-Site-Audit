@@ -33,6 +33,11 @@ $device = $_
 
 $cwd = $using:PSScriptRoot
 
+$result = @{
+    Device    = $device
+    Exception = $null
+}
+
 try {
     $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
     $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
@@ -42,7 +47,7 @@ try {
     }
 
     if ($device.ErrorMessage) {
-        throw $device.ErrorMessage
+        return $result
     }
 
     $deviceParams = @{
@@ -54,8 +59,12 @@ try {
 
     $discoveredDevices = Read-AutoDiscovery @deviceParams
     $device | Add-Member DiscoveredDevices $discoveredDevices
+
+    $result.Device = $device
 }
-catch {}
+catch {
+    $result.Exception = $_.Exception
+}
 finally {
-    $device
+    $result
 }

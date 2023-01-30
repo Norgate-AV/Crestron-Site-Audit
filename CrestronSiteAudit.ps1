@@ -372,7 +372,7 @@ Write-Console -ForegroundColor Green -Message "Audit File => $outputFile"
 # Gather initial device information
 ################################################################################
 Format-SectionHeader -Title "TASK [Getting Device Information]"
-$deviceInfo = @()
+$deviceList = @()
 
 $commonJobParams = @{
     Throttle        = 50
@@ -388,16 +388,29 @@ try {
     }
 
     $devices | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
-        $errorMessage = $_.ErrorMessage
+        $device = $_.Device
+        $exception = $_.Exception
+        $deviceInfo = $_.DeviceInfo
 
-        if ($errorMessage) {
-            Write-Console -Message "error: [$($_.Device)] => $errorMessage" -ForegroundColor Red
+        if ($exception) {
+            Write-Console -Message "error: [$($device.address)] => $($exception.GetBaseException().Message)" -ForegroundColor Red
             return
         }
 
-        $deviceInfo += $_
+        if (!$deviceInfo) {
+            Write-Console -Message "error: [$($device.address)] => Failed to get device information" -ForegroundColor Red
+            return
+        }
 
-        Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
+        $deviceList += $deviceInfo
+
+        $errorMessage = $deviceInfo.ErrorMessage
+        if ($errorMessage) {
+            Write-Console -Message "error: [$($device.address)] => $errorMessage" -ForegroundColor Red
+            return
+        }
+
+        Write-Console -Message "ok: [$($device.address)]" -ForegroundColor Green
     }
 }
 catch {
@@ -408,15 +421,17 @@ finally {
     Get-RSJob | Remove-RSJob -Force
 }
 
-if ($deviceInfo.Count -eq 0) {
+if ($deviceList.Count -eq 0) {
     Write-Console -Message "error: Failed to get device information" -ForegroundColor Red
     Invoke-CleanUp
     exit 1
 }
 
-if ($deviceInfo.Count -ne $devices.Count) {
+if ($deviceList.Count -ne $devices.Count) {
     Write-Console -Message "warning: Failed to get device information for all devices" -ForegroundColor Yellow
 }
+
+$devicesWithoutErrors = $deviceList | Where-Object { $_.ErrorMessage -eq "" }
 
 
 ################################################################################
@@ -432,7 +447,7 @@ if (!(Test-Path -Path $OutputDirectory -PathType "Container")) {
 # Filter Control Systems
 ################################################################################
 $controlSystems = @()
-$controlSystems += $deviceInfo | Select-ControlSystem
+$controlSystems += $devicesWithoutErrors | Select-ControlSystem
 if ($controlSystems) {
     Format-SectionHeader -Title "CONTROL SYSTEMS"
     Set-HostForeGroundColour -Colour Green
@@ -462,7 +477,7 @@ $4SeriesControlSystems += $controlSystems | Where-Object { $_.Series -eq $Series
 # Filter Touch Panels
 ################################################################################
 $touchPanels = @()
-$touchPanels += $deviceInfo | Select-TouchPanel
+$touchPanels += $devicesWithoutErrors | Select-TouchPanel
 if ($touchPanels) {
     Format-SectionHeader -Title "TOUCH PANELS"
     Set-HostForeGroundColour -Colour Green
@@ -488,17 +503,24 @@ try {
         ScriptBlock = [ScriptBlock]::Create($script)
     }
 
-    $deviceInfo | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
-        $errorMessage = $_.RuntimeInfo.ErrorMessage
+    $devicesWithoutErrors | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
+        $device = $_.Device
+        $exception = $_.Exception
 
-        if ($errorMessage) {
-            Write-Console -Message "error: [$($_.Device)] => $errorMessage" -ForegroundColor Red
+        if ($exception) {
+            Write-Console -Message "error: [$($device.Device)] => $($exception.GetBaseException().Message)" -ForegroundColor Red
             return
         }
 
-        $_ | Export-DeviceRuntimeInfo
+        $errorMessage = $device.RuntimeInfo.ErrorMessage
+        if ($errorMessage) {
+            Write-Console -Message "error: [$($device.Device)] => $errorMessage" -ForegroundColor Red
+            return
+        }
 
-        Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
+        $device | Export-DeviceRuntimeInfo
+
+        Write-Console -Message "ok: [$($device.Device)]" -ForegroundColor Green
     }
 }
 catch {
@@ -531,14 +553,21 @@ if ($BackupDeviceFiles) {
             }
 
             $devicesToBackup | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
-                $errorMessage = $_.ErrorMessage
+                $device = $_.Device
+                $exception = $_.Exception
 
-                if ($errorMessage) {
-                    Write-Console -Message "error: [$($_.Device)] => $errorMessage" -ForegroundColor Red
+                if ($exception) {
+                    Write-Console -Message "error: [$($device.Device)] => $($exception.GetBaseException().Message)" -ForegroundColor Red
                     return
                 }
 
-                Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
+                $errorMessage = $device.ErrorMessage
+                if ($errorMessage) {
+                    Write-Console -Message "error: [$($device.Device)] => $errorMessage" -ForegroundColor Red
+                    return
+                }
+
+                Write-Console -Message "ok: [$($device.Device)]" -ForegroundColor Green
             }
         }
         catch {
@@ -570,21 +599,29 @@ try {
     }
 
     $controlSystems | Where-Object { $_.Series -ge $Series.Series3 } | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
-        if (!$_.DiscoveredDevices) {
-            Write-Console -Message "error: [$($_.Device)] => Failed to read autodiscovery" -ForegroundColor Red
+        $device = $_.Device
+        $exception = $_.Exception
+
+        if ($exception) {
+            Write-Console -Message "error: [$($device.Device)] => $($exception.GetBaseException().Message)" -ForegroundColor Red
             return
         }
 
-        Write-Console -Message "ok: [$($_.Device)]" -ForegroundColor Green
-
-        if ($_.DiscoveredDevices.Count -eq 0) {
+        if (!$device.DiscoveredDevices) {
+            Write-Console -Message "error: [$($device.Device)] => Failed to read autodiscovery" -ForegroundColor Red
             return
         }
 
-        $discoveredDevicesFile = Join-Path -Path $_.DeviceDirectory -ChildPath "DiscoveredDevices.xlsx"
-        $_.DiscoveredDevices | Export-Excel -Path $discoveredDevicesFile -FreezeTopRow -AutoSize -Append
+        Write-Console -Message "ok: [$($device.Device)]" -ForegroundColor Green
 
-        $newDevices += $_.DiscoveredDevices | Where-Object { $_.Hostname -notin $deviceInfo.Hostname -and $_.Hostname -notin $newDevices.Hostname }
+        if ($device.DiscoveredDevices.Count -eq 0) {
+            return
+        }
+
+        $discoveredDevicesFile = Join-Path -Path $device.DeviceDirectory -ChildPath "DiscoveredDevices.xlsx"
+        $device.DiscoveredDevices | Export-Excel -Path $discoveredDevicesFile -FreezeTopRow -AutoSize -Append
+
+        $newDevices += $device.DiscoveredDevices | Where-Object { $_.Hostname -notin $deviceList.Hostname -and $_.Hostname -notin $newDevices.Hostname }
     }
 }
 catch {
@@ -618,10 +655,10 @@ else {
 ################################################################################
 # Export final audit report
 ################################################################################
-$deviceInfo | Select-Object -Property * -ExcludeProperty Credential, ProgramInfo, RuntimeInfo, IPTableInfo, DiscoveredDevices | `
+$deviceList | Select-Object -Property * -ExcludeProperty Credential, ProgramInfo, RuntimeInfo, IPTableInfo, DiscoveredDevices | `
     Export-Excel -Path $outputFile -FreezeTopRow -AutoSize -Append
 
-$deviceInfo | `
+$deviceList | `
     Select-Object -Property * `
     -ExcludeProperty Credential, RuntimeInfo, ProgramBootDirectory, SourceFile, ProgramFile, SystemName, Programmer, CompiledOn, `
     CompilerRev, CrestronDb, DeviceDb, SymLibRev, IoLibRev, IopCfgRev, SourceEnv, TargetRack, ConfigRev, Include4DotDat, FriendlyName, `
@@ -639,7 +676,7 @@ $timespan = New-TimeSpan -Seconds $seconds
 
 Format-SectionHeader -Title "SUMMARY IN $($timespan.ToString("h'h 'm'm 's's'"))"
 Set-HostForeGroundColour -Colour Green
-$deviceInfo | Format-Table -Property IPAddress, Category, Hostname, Prompt, MACAddress, VersionOS, ProgramFile, SourceFile, Programmer, CompiledOn
+$devicesWithoutErrors | Format-Table -Property IPAddress, Category, Hostname, Prompt, MACAddress, VersionOS, ProgramFile, SourceFile, Programmer, CompiledOn
 
 Write-Output "Total Control Systems: $(@($controlSystems).Count)"
 Write-Output "Total 2-Series Control Systems: $(@($2SeriesControlSystems).Count)"

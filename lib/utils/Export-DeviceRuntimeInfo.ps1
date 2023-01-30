@@ -43,9 +43,9 @@ function Export-DeviceRuntimeInfo {
         $deviceDirectory = $Device.DeviceDirectory
         New-Item -Path $deviceDirectory -Type Directory -Force | Out-Null
 
-        if ($Device.RuntimeInfo.Info) {
+        if ($Device.RuntimeInfo) {
             $runtimeInfoFile = Join-Path -Path $deviceDirectory -ChildPath "RuntimeInfo.txt"
-            $Device.RuntimeInfo.Info | Out-File -FilePath $runtimeInfoFile -Force
+            $Device.RuntimeInfo | Out-File -FilePath $runtimeInfoFile -Force
         }
 
         if ($Device.ProgramInfo) {
