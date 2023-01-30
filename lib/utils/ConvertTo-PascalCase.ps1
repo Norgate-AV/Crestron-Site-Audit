@@ -39,5 +39,7 @@ function ConvertTo-PascalCase {
         $Value
     )
 
-    return [regex]::Replace($Value, '(?i)(?:^|[_ -]+)(\p{L})', { $args[0].Groups[1].Value.ToUpper() })
+    process {
+        return [regex]::Replace($Value, '(?i)(?:^|[_ -]+)(\p{L})', { $args[0].Groups[1].Value.ToUpper() })
+    }
 }

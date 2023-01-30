@@ -43,10 +43,16 @@ function Write-Console {
         $ForegroundColor = "White"
     )
 
-    $originalForegroundColor = $Host.UI.RawUI.ForegroundColor
-    $Host.UI.RawUI.ForegroundColor = $ForegroundColor
+    begin {
+        $originalForegroundColor = $Host.UI.RawUI.ForegroundColor
+        $Host.UI.RawUI.ForegroundColor = $ForegroundColor
+    }
 
-    Write-Output $Message
+    process {
+        Write-Output $Message
+    }
 
-    $Host.UI.RawUI.ForegroundColor = $originalForegroundColor
+    end {
+        $Host.UI.RawUI.ForegroundColor = $originalForegroundColor
+    }
 }
