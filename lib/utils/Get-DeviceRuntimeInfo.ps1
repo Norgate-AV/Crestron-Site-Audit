@@ -63,15 +63,18 @@ function Get-DeviceRuntimeInfo {
         try {
             $session = Open-CrestronSession @params
 
-            $result.RuntimeInfo += "Crestron $($Device.Category) Connected: $($Device.IPAddress)`r`n`r`n"
+            $builder = [System.Text.StringBuilder]::new()
+            $builder.Append("Crestron $($Device.Category) Connected: $($Device.IPAddress)`r`n`r`n")
 
             $commands | ForEach-Object {
                 Write-Verbose "notice: [$($Device.Device)]: => Adding Runtime Section [$($_.Section)]"
-                $result.RuntimeInfo += "$($_.Section):`r`n`r`nInvoking Command(s): [$($_.Commands -join ", ")]`r`n`r`n"
+                $builder.Append("$($_.Section):`r`n`r`nInvoking Command(s): [$($_.Commands -join ", ")]`r`n`r`n")
 
                 Write-Verbose "notice: [$($Device.Device)]: => Invoking Runtime Command(s) [$($_.Commands -join ", ")]"
-                $result.RuntimeInfo += "$($_.Commands | Invoke-CrestronSession -Handle $session)`r`n`r`n"
+                $builder.Append("$($_.Commands | Invoke-CrestronSession -Handle $session)`r`n`r`n")
             }
+
+            $result.RuntimeInfo = $builder.ToString()
         }
         catch {
             $result.Exception = $_.Exception
@@ -79,6 +82,10 @@ function Get-DeviceRuntimeInfo {
         finally {
             if ($session) {
                 Close-CrestronSession -Handle $session
+            }
+
+            if ($builder) {
+                $builder = $null
             }
         }
     }
