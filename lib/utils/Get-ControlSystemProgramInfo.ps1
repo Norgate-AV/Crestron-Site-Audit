@@ -66,35 +66,23 @@ function Convert-ProgramInfo {
         FriendlyName         = ""
     }
 
-    $pattern = '[\s\S]+Program Boot Directory[\s]*:[\s]*([\s\S]+)[\s\S]+Source File[\s]*:[\s]*([\s\S]+)[\s\S]+Program File[\s]*:[\s]*([\s\S].+)[\s\S]+System Name[\s]*:[\s]*([\s\S]+)[\s\S]+Programmer[\s]*:[\s]*([\s\S]+)[\s\S]+Compiled On[\s]*:[\s]*([\w\ \/\:]+)[\s\S]+Compiler Rev[\s]*:[\s]*([\w\.]+)[\s\S]+CrestronDB[\s]*:[\s]*([\w\.]+)[\s\S]+DeviceDB[\s]*:[\s]*([\w\.]+)[\s\S]+SYMLIB Rev[\s]*:[\s]*([\w\.]+)[\s\S]+IOLIB Rev[\s]*:[\s]*([\w\.]+)[\s\S]+IOPCFG Rev[\s]*:[\s]*([\w\.]+)[\s\S]+Source Env[\s]*:[\s]*([\s\S].+)[\s\S]+Target Rack[\s]*:[\s]*([\s\S].+)[\s\S]+Config Rev[\s]*:[\s]*([\w\.]+)[\s\S]+Include4\.dat[\s]*:[\s]*([\w\.]+)[\s\S]+Friendly Name[\s]*:[\s]*([\w\.]+)'
-
-    $regex = [Regex]::new($pattern, [System.Text.RegularExpressions.RegexOptions]::Multiline)
-
-    $match = $regex.Match($ConsoleResponse)
-
-    if (!$match.Success) {
-        return $result
-    }
-
-    $groups = $match.Groups
-
-    $result.ProgramBootDirectory = $groups[1].Value.Trim()
-    $result.SourceFile = $groups[2].Value.Trim()
-    $result.ProgramFile = $groups[3].Value.Trim()
-    $result.SystemName = $groups[4].Value.Trim()
-    $result.Programmer = $groups[5].Value.Trim()
-    $result.CompiledOn = $groups[6].Value.Trim()
-    $result.CompilerRev = $groups[7].Value.Trim()
-    $result.CrestronDb = $groups[8].Value.Trim()
-    $result.DeviceDb = $groups[9].Value.Trim()
-    $result.SymLibRev = $groups[10].Value.Trim()
-    $result.IoLibRev = $groups[11].Value.Trim()
-    $result.IopCfgRev = $groups[12].Value.Trim()
-    $result.SourceEnv = $groups[13].Value.Trim()
-    $result.TargetRack = $groups[14].Value.Trim()
-    $result.ConfigRev = $groups[15].Value.Trim()
-    $result.Include4DotDat = $groups[16].Value.Trim()
-    $result.FriendlyName = $groups[17].Value.Trim()
+    $result.ProgramBootDirectory = [Regex]::Match($ConsoleResponse, '(?<=Program Boot Directory\s*:\s*)[\S].+').Value.Trim()
+    $result.SourceFile = [Regex]::Match($ConsoleResponse, '(?<=Source File\s*:\s*)[\S].+').Value.Trim()
+    $result.ProgramFile = [Regex]::Match($ConsoleResponse, '(?<=Program File\s*:\s*)[\S].+').Value.Trim()
+    $result.SystemName = [Regex]::Match($ConsoleResponse, '(?<=System Name\s*:\s*)[\S].+').Value.Trim()
+    $result.Programmer = [Regex]::Match($ConsoleResponse, '(?<=Programmer\s*:\s*)[\S].+').Value.Trim()
+    $result.CompiledOn = [Regex]::Match($ConsoleResponse, '(?<=Compiled On\s*:\s*)[\S].+').Value.Trim()
+    $result.CompilerRev = [Regex]::Match($ConsoleResponse, '(?<=Compiler Rev\s*:\s*)[\S].+').Value.Trim()
+    $result.CrestronDb = [Regex]::Match($ConsoleResponse, '(?<=CrestronDB\s*:\s*)[\S].+').Value.Trim()
+    $result.DeviceDb = [Regex]::Match($ConsoleResponse, '(?<=DeviceDB\s*:\s*)[\S].+').Value.Trim()
+    $result.SymLibRev = [Regex]::Match($ConsoleResponse, '(?<=SYMLIB Rev\s*:\s*)[\S].+').Value.Trim()
+    $result.IoLibRev = [Regex]::Match($ConsoleResponse, '(?<=IOLIB Rev\s*:\s*)[\S].+').Value.Trim()
+    $result.IopCfgRev = [Regex]::Match($ConsoleResponse, '(?<=IOPCFG Rev\s*:\s*)[\S].+').Value.Trim()
+    $result.SourceEnv = [Regex]::Match($ConsoleResponse, '(?<=Source Env\s*:\s*)[\S].+').Value.Trim()
+    $result.TargetRack = [Regex]::Match($ConsoleResponse, '(?<=Target Rack\s*:\s*)[\S].+').Value.Trim()
+    $result.ConfigRev = [Regex]::Match($ConsoleResponse, '(?<=Config Rev\s*:\s*)[\S].+').Value.Trim()
+    $result.Include4DotDat = [Regex]::Match($ConsoleResponse, '(?<=Include4(?:_2Series)?\.dat\s*:\s*)[\S].+').Value.Trim()
+    $result.FriendlyName = [Regex]::Match($ConsoleResponse, '(?<=Friendly Name:\s*)[\S].+').Value.Trim()
 
     return $result
 }
@@ -123,7 +111,7 @@ function Get-ControlSystemProgramInfo {
 
             $session = Open-CrestronSession @params
 
-            if ($Device.Series -ge 3) {
+            if ($Device.Series -ge $Series.Series3) {
             (1..10) | ForEach-Object {
                     $response = Invoke-CrestronSession $session "progcomments:$_"
 
