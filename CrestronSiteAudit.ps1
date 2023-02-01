@@ -526,7 +526,7 @@ try {
             return
         }
 
-        $device | Export-DeviceRuntimeInfo
+        $device | Export-DeviceRuntimeInfo -ExcelParams $commonExcelParams
 
         Write-Console -Message "ok: [$($device.Device)]" -ForegroundColor Green
     }
