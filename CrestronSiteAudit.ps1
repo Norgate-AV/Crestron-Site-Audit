@@ -367,6 +367,14 @@ Write-Console
 Write-Console -ForegroundColor Green -Message "Output Directory => $OutputDirectory"
 Write-Console -ForegroundColor Green -Message "Audit File => $outputFile"
 
+$commonExcelParams = @{
+    FreezeTopRow = $true
+    BoldTopRow   = $true
+    AutoSize     = $true
+    AutoFilter   = $true
+    Append       = $true
+}
+
 
 ################################################################################
 # Gather initial device information
@@ -417,7 +425,7 @@ catch {
     Write-Console -Message "error: Failed to get device information => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
 finally {
-    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
+    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") @commonExcelParams
     Get-RSJob | Remove-RSJob -Force
 }
 
@@ -527,7 +535,7 @@ catch {
     Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
 finally {
-    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
+    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") @commonExcelParams
     Get-RSJob | Remove-RSJob -Force
 }
 
@@ -574,7 +582,7 @@ if ($BackupDeviceFiles) {
             Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
         }
         finally {
-            Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
+            Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") @commonExcelParams
             Get-RSJob | Remove-RSJob
         }
     }
@@ -619,7 +627,7 @@ try {
         }
 
         $discoveredDevicesFile = Join-Path -Path $device.DeviceDirectory -ChildPath "DiscoveredDevices.xlsx"
-        $device.DiscoveredDevices | Export-Excel -Path $discoveredDevicesFile -FreezeTopRow -AutoSize -Append
+        $device.DiscoveredDevices | Export-Excel -Path $discoveredDevicesFile @commonExcelParams
 
         $newDevices += $device.DiscoveredDevices | Where-Object { $_.Hostname -notin $deviceList.Hostname -and $_.Hostname -notin $newDevices.Hostname }
     }
@@ -628,7 +636,7 @@ catch {
     Write-Console -Message "error: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
 }
 finally {
-    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") -FreezeTopRow -AutoSize -Append
+    Get-RSJob | Export-Excel -Path (Join-Path -Path $OutputDirectory -ChildPath "RSJobs.xlsx") @commonExcelParams
     Get-RSJob | Remove-RSJob
 }
 
@@ -645,7 +653,7 @@ if ($newDevices) {
     Write-Console -Message "notice: New Devices Found: $($newDevices.Count)" -ForegroundColor Yellow
     Write-Console -Message "notice: These devices have not been audited because they are not included in the manifest" -ForegroundColor Yellow
     $newDevicesFile = Join-Path -Path $OutputDirectory -ChildPath "NewDevices.xlsx"
-    $newDevices | Export-Excel -Path $newDevicesFile -FreezeTopRow -AutoSize -Append
+    $newDevices | Export-Excel -Path $newDevicesFile @commonExcelParams
 }
 else {
     Write-Console -Message "ok: No new devices discovered" -ForegroundColor Green
@@ -656,7 +664,7 @@ else {
 # Export final audit report
 ################################################################################
 $deviceList | Select-Object -Property * -ExcludeProperty Credential, ProgramInfo, RuntimeInfo, IPTableInfo, DiscoveredDevices | `
-    Export-Excel -Path $outputFile -FreezeTopRow -AutoSize -Append
+    Export-Excel -Path $outputFile @commonExcelParams
 
 $deviceList | `
     Select-Object -Property * `
