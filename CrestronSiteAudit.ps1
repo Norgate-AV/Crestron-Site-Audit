@@ -375,7 +375,7 @@ Format-SectionHeader -Title "TASK [Getting Device Information]"
 $deviceList = @()
 
 $commonJobParams = @{
-    Throttle        = 50
+    Throttle        = 100
     ModulesToImport = @($crestronModule.Name)
 }
 

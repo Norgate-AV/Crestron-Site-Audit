@@ -55,6 +55,7 @@ try {
         Secure        = $device.secure
         Username      = $deviceCredential.Username
         Password      = $deviceCredential.Password
+        ThrottleLimit = 100
     }
 
     $versionInfo = Get-VersionInfo @deviceParams
