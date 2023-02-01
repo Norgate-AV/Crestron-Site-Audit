@@ -51,10 +51,10 @@ try {
     $deviceCredential = Get-DeviceCredential -Credentials $credentials -Id $device.credentialId
 
     $deviceParams = @{
-        Device   = $device.address
-        Secure   = $device.secure
-        Username = $deviceCredential.username
-        Password = $deviceCredential.password
+        Device        = $device.address
+        Secure        = $device.secure
+        Username      = $deviceCredential.Username
+        Password      = $deviceCredential.Password
     }
 
     $versionInfo = Get-VersionInfo @deviceParams
