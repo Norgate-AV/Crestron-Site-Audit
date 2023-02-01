@@ -75,7 +75,6 @@ try {
         $programInfo = $controlSystem | Get-ControlSystemProgramInfo
 
         $versionInfo | Add-Member ProgramInfo $programInfo
-
         foreach ($property in $programInfo[0].PSObject.Properties | Where-Object { $_.Name -ne "Device" }) {
             $versionInfo | Add-Member $property.Name $property.Value
         }
@@ -87,7 +86,6 @@ try {
         $programInfo = $touchPanel | Get-TouchPanelProgramInfo
 
         $versionInfo | Add-Member ProgramInfo $programInfo
-
         foreach ($property in $programInfo[0].PSObject.Properties | Where-Object { $_.Name -ne "Device" }) {
             $versionInfo | Add-Member $property.Name $property.Value
         }
