@@ -380,7 +380,7 @@ $commonExcelParams = @{
 # Gather initial device information
 ################################################################################
 Format-SectionHeader -Title "TASK [Getting Device Information]"
-$deviceList = @()
+$deviceList = [System.Collections.ArrayList]::new()
 
 $commonJobParams = @{
     Throttle        = 100
@@ -410,7 +410,7 @@ try {
             return
         }
 
-        $deviceList += $deviceInfo
+        [void] $deviceList.Add($deviceInfo)
 
         $errorMessage = $deviceInfo.ErrorMessage
         if ($errorMessage) {
