@@ -73,6 +73,8 @@ try {
     if ($controlSystem) {
         $controlSystem | Add-Member Series ($controlSystem | Get-ControlSystemSeries)
 
+        $controlSystem.IPAddress = $controlSystem.IPAddress | Invoke-NormalizeIPAddress
+
         $programInfo = $controlSystem | Get-ControlSystemProgramInfo
 
         $versionInfo | Add-Member ProgramInfo $programInfo
