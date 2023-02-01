@@ -37,7 +37,7 @@ function Get-DeviceCredential {
         [PSCustomObject[]] $Credentials,
 
         [Parameter(Mandatory = $true)]
-        [guid] $Id
+        [string] $Id
     )
 
     $deviceCredential = ($Credentials | Where-Object { $_.id -eq $Id }).credential
