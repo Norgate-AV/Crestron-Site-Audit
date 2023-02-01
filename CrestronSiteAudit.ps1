@@ -694,6 +694,14 @@ Write-Output "Total Touch Panels: $(@($touchPanels).Count)"
 
 Set-HostForeGroundColour
 
+Write-Console
+if ($newDevices.Count) {
+    Write-Console -Message "Total Unaudited Devices: $($newDevices.Count)" -ForegroundColor Yellow
+}
+else {
+    Write-Console -Message "Total Unaudited Devices: $($newDevices.Count)" -ForegroundColor Green
+}
+
 
 ################################################################################
 # Clean up
