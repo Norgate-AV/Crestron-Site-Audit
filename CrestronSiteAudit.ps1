@@ -650,13 +650,13 @@ if ($newDevices) {
     $newDevices | Format-Table
     Set-HostForeGroundColour
 
-    Write-Console -Message "notice: New Devices Found: $($newDevices.Count)" -ForegroundColor Yellow
+    Write-Console -Message "notice: Unaudited Devices Found => $($newDevices.Count)" -ForegroundColor Yellow
     Write-Console -Message "notice: These devices have not been audited because they are not included in the manifest" -ForegroundColor Yellow
-    $newDevicesFile = Join-Path -Path $OutputDirectory -ChildPath "NewDevices.xlsx"
+    $newDevicesFile = Join-Path -Path $OutputDirectory -ChildPath "UnauditedDevices.xlsx"
     $newDevices | Export-Excel -Path $newDevicesFile @commonExcelParams
 }
 else {
-    Write-Console -Message "ok: No new devices discovered" -ForegroundColor Green
+    Write-Console -Message "ok: No unaudited devices discovered" -ForegroundColor Green
 }
 
 
