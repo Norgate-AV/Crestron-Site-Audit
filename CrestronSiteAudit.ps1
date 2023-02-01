@@ -29,6 +29,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+using namespace System.Collections.Generic
+
 [CmdletBinding()]
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'LogsOnly', Justification = 'Referenced in scriptblock.')]
@@ -380,7 +382,7 @@ $commonExcelParams = @{
 # Gather initial device information
 ################################################################################
 Format-SectionHeader -Title "TASK [Getting Device Information]"
-$deviceList = [System.Collections.ArrayList]::new()
+$deviceList = [List[PSCustomObject]]::new()
 
 $commonJobParams = @{
     Throttle        = 100
@@ -410,7 +412,7 @@ try {
             return
         }
 
-        [void] $deviceList.Add($deviceInfo)
+        $deviceList.Add($deviceInfo)
 
         $errorMessage = $deviceInfo.ErrorMessage
         if ($errorMessage) {
