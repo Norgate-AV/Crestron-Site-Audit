@@ -87,6 +87,6 @@ function Get-ControlSubnetReservedLeaseList {
     }
 
     end {
-        return $leases
+        return $result
     }
 }
