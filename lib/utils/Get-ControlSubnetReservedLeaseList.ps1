@@ -29,7 +29,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-ControlSubnetReservedLeases {
+using namespace System.Collections.Generic
+
+function Get-ControlSubnetReservedLeaseList {
     [CmdletBinding()]
 
     param (
@@ -40,7 +42,10 @@ function Get-ControlSubnetReservedLeases {
     )
 
     begin {
-        $leases = @()
+        $result = @{
+            Exception = $null
+            Leases    = $null
+        }
 
         $pattern = [regex] '(?i)(?<mac>(?:[a-f\d]{2}(?: |\.|:)){5}[a-f\d]{2}) *\| *(?<ip>[\x21-\x7a][\x20-\x7a]+[\x21-\x7a]) *\| *(?<description>[\w-]+)'
     }
@@ -59,19 +64,29 @@ function Get-ControlSubnetReservedLeases {
             $patternMatches = $pattern.Matches($response)
 
             $patternMatches | ForEach-Object {
-                $leases += [PSCustomObject] @{
+                if ($result.Leases -eq $null) {
+                    $result.Leases = [List[PSCustomObject]]::new()
+                }
+
+                $lease = [PSCustomObject] @{
                     MacAddress  = $_.Groups["mac"].Value.ToUpper()
                     IPAddress   = $_.Groups["ip"].Value
                     Description = $_.Groups["description"].Value
                 }
+
+                $result.Leases.Add($lease)
+            }
+
+            if ($result.Leases -ne $null) {
+                $result.Leases.Sort({ Sort-Object -Property IPAddress })
             }
         }
         catch {
-
+            $result.Exception = $_.Exception
         }
     }
 
     end {
-        return $leases | Sort-Object -Property IPAddress
+        return $leases
     }
 }

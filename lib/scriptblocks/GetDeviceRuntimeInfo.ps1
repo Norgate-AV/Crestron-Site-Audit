@@ -89,7 +89,7 @@ try {
 
         $controlSubnetInfo = [PSCustomObject] @{
             DhcpLeases     = ($device | Get-ControlSubnetDhcpLeaseList).Leases
-            ReservedLeases = $device | Get-ControlSubnetReservedLeases
+            ReservedLeases = ($device | Get-ControlSubnetReservedLeaseList).Leases
             PortMap        = $controlSubnetPortMap
         }
 
