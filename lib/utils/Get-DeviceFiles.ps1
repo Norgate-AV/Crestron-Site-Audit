@@ -32,6 +32,8 @@ SOFTWARE.
 function Get-DeviceFiles {
     [CmdletBinding()]
 
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'OutputDirectory', Justification = 'Referenced in scriptblock.')]
+
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [PSCustomObject]
@@ -42,6 +44,10 @@ function Get-DeviceFiles {
         [ValidateNotNullOrEmpty()]
         [string]
         $OutputDirectory,
+
+        [Parameter(Mandatory = $false)]
+        [regex]
+        $Filter = '.*',
 
         [Parameter(Mandatory = $false)]
         [switch]
@@ -70,8 +76,10 @@ function Get-DeviceFiles {
         }
 
         if ($LogsOnly) {
-            $entities = $entities | Where-Object { $_.Directory -and $_.Name -match 'p?logs?' }
+            $Filter = '(?i)p?logs?'
         }
+
+        $entities = $entities | Where-Object { $_.Directory -and $_.Name -match $Filter }
 
         $entities | ForEach-Object {
             $entity = $_

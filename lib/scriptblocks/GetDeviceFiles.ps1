@@ -32,6 +32,7 @@ SOFTWARE.
 $device = $_
 
 $cwd = $using:PSScriptRoot
+$filter = $using:Filter
 $logsOnly = $using:LogsOnly
 
 $result = @{
@@ -51,7 +52,7 @@ try {
         return $result
     }
 
-    $device | Get-DeviceFiles -OutputDirectory $device.DeviceDirectory -LogsOnly:$logsOnly
+    $device | Get-DeviceFiles -OutputDirectory $device.DeviceDirectory -Filter $filter -LogsOnly:$logsOnly
 }
 catch {
     $result.Exception = $_.Exception

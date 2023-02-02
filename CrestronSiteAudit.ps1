@@ -34,6 +34,7 @@ using namespace System.Collections.Generic
 [CmdletBinding()]
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'LogsOnly', Justification = 'Referenced in scriptblock.')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Filter', Justification = 'Referenced in scriptblock.')]
 
 param(
     [Parameter(Mandatory = $false)]
@@ -49,6 +50,10 @@ param(
     [Parameter(Mandatory = $false)]
     [switch]
     $BackupDeviceFiles = $false,
+
+    [Parameter(Mandatory = $false)]
+    [regex]
+    $Filter = '.*',
 
     [Parameter(Mandatory = $false)]
     [switch]
