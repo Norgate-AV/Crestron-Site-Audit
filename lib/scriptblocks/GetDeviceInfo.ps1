@@ -78,7 +78,15 @@ try {
         [List[PSCustomObject]] $programInfo = ($controlSystem | Get-ControlSystemProgramInfo).ProgramInfoList
 
         $versionInfo | Add-Member ProgramInfo $programInfo
-        foreach ($property in $programInfo[0].PSObject.Properties | Where-Object { $_.Name -ne "Device" }) {
+
+        if ($controlSystem.Series -eq $Series.Series3) {
+            $firstProgram = $programInfo[1]
+        }
+        else {
+            $firstProgram = $programInfo[0]
+        }
+
+        foreach ($property in $firstProgram.PSObject.Properties | Where-Object { $_.Name -ne "Device" }) {
             $versionInfo | Add-Member $property.Name $property.Value
         }
 
