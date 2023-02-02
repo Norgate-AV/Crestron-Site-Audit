@@ -52,7 +52,7 @@ try {
         return $result
     }
 
-    $device | Get-DeviceFiles -OutputDirectory $device.DeviceDirectory -Filter $filter -LogsOnly:$logsOnly
+    $device | Get-DeviceBackup -OutputDirectory $device.DeviceDirectory -Filter $filter -LogsOnly:$logsOnly
 }
 catch {
     $result.Exception = $_.Exception

@@ -49,7 +49,7 @@ param(
 
     [Parameter(Mandatory = $false)]
     [switch]
-    $BackupDeviceFiles = $false,
+    $BackupDevices = $false,
 
     [Parameter(Mandatory = $false)]
     [regex]
@@ -101,7 +101,7 @@ try {
 
     $getDeviceInfoScriptBlock = Join-Path -Path $scriptBlockDirectory -ChildPath "GetDeviceInfo.ps1"
     $getDeviceRuntimeInfoScriptBlock = Join-Path -Path $scriptBlockDirectory -ChildPath "GetDeviceRuntimeInfo.ps1"
-    $getDeviceFilesScriptBlock = Join-Path -Path $scriptBlockDirectory -ChildPath "GetDeviceFiles.ps1"
+    $getDeviceFilesScriptBlock = Join-Path -Path $scriptBlockDirectory -ChildPath "GetDeviceBackup.ps1"
     $getDeviceAutoDiscoveryScriptBlock = Join-Path -Path $scriptBlockDirectory -ChildPath "GetDeviceAutoDiscovery.ps1"
 
     $files = @(
@@ -369,7 +369,7 @@ Format-SectionHeader -Title "AUDIT DETAILS"
 Write-Console -ForegroundColor Green -Message "Manifest File => $ManifestFile"
 Write-Console -ForegroundColor Green -Message "Environment File => $envFile"
 Write-Console -ForegroundColor Green -Message "Device Count => $($devices.Count)"
-Write-Console -ForegroundColor Green -Message "Device File Backup => $($BackupDeviceFiles)"
+Write-Console -ForegroundColor Green -Message "Device Backup => $($BackupDevices)"
 Write-Console
 Write-Console -ForegroundColor Green -Message "Output Directory => $OutputDirectory"
 Write-Console -ForegroundColor Green -Message "Audit File => $outputFile"
@@ -541,10 +541,10 @@ finally {
 
 
 ################################################################################
-# Run device file backup
+# Run device backup
 ################################################################################
-if ($BackupDeviceFiles) {
-    Format-SectionHeader -Title "TASK [Backing up Device Files]"
+if ($BackupDevices) {
+    Format-SectionHeader -Title "TASK [Getting Device Backups]"
 
     $devicesToBackup = [List[PSCustomObject]]::new()
     $devicesToBackup.AddRange($3SeriesControlSystems.ToArray())
@@ -558,7 +558,7 @@ if ($BackupDeviceFiles) {
             $script = Get-Content -Path $getDeviceFilesScriptBlock -Raw -ErrorAction Stop
 
             $thisJobParams = @{
-                Name        = { "GetDeviceFiles-[$($_.Device)]" }
+                Name        = { "GetDeviceBackup-[$($_.Device)]" }
                 ScriptBlock = [ScriptBlock]::Create($script)
             }
 
