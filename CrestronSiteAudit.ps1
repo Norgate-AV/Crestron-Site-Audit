@@ -456,8 +456,7 @@ if (!(Test-Path -Path $OutputDirectory -PathType "Container")) {
 ################################################################################
 # Filter Control Systems
 ################################################################################
-$controlSystems = @()
-$controlSystems += $devicesWithoutErrors | Select-ControlSystem
+$controlSystems = [List[PSCustomObject]]::new($devicesWithoutErrors.Where({ Select-ControlSystem -Device $_ }))
 if ($controlSystems) {
     Format-SectionHeader -Title "CONTROL SYSTEMS"
     Set-HostForeGroundColour -Colour Green
