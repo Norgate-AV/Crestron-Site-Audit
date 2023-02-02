@@ -472,14 +472,9 @@ if ($controlSystems) {
 ################################################################################
 # Filter Control Systems by Series
 ################################################################################
-$2SeriesControlSystems = @()
-$2SeriesControlSystems += $controlSystems | Where-Object { $_.Series -eq $Series.Series2 }
-
-$3SeriesControlSystems = @()
-$3SeriesControlSystems += $controlSystems | Where-Object { $_.Series -eq $Series.Series3 }
-
-$4SeriesControlSystems = @()
-$4SeriesControlSystems += $controlSystems | Where-Object { $_.Series -eq $Series.Series4 }
+$2SeriesControlSystems = [List[PSCustomObject]]::new($controlSystems.Where({ $_.Series -eq $Series.Series2 }))
+$3SeriesControlSystems = [List[PSCustomObject]]::new($controlSystems.Where({ $_.Series -eq $Series.Series3 }))
+$4SeriesControlSystems = [List[PSCustomObject]]::new($controlSystems.Where({ $_.Series -eq $Series.Series4 }))
 
 
 ################################################################################
