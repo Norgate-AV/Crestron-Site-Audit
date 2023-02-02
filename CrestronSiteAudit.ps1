@@ -441,7 +441,7 @@ if ($deviceList.Count -ne $devices.Count) {
     Write-Console -Message "warning: Failed to get device information for all devices" -ForegroundColor Yellow
 }
 
-$devicesWithoutErrors = $deviceList | Where-Object { $_.ErrorMessage -eq "" }
+$devicesWithoutErrors = [List[PSCustomObject]]::new($deviceList.Where({ $_.ErrorMessage -eq "" }))
 
 
 ################################################################################
