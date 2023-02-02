@@ -79,7 +79,8 @@ function Get-ControlSystemProgramInfo {
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNullOrEmpty()]
-        [PSCustomObject] $Device
+        [PSCustomObject]
+        $Device
     )
 
     begin {
