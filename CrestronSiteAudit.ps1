@@ -546,10 +546,10 @@ finally {
 if ($BackupDeviceFiles) {
     Format-SectionHeader -Title "TASK [Backing up Device Files]"
 
-    $devicesToBackup = @()
-    $devicesToBackup += $3SeriesControlSystems
-    $devicesToBackup += $4SeriesControlSystems
-    $devicesToBackup += $touchPanels
+    $devicesToBackup = [List[PSCustomObject]]::new()
+    $devicesToBackup.AddRange($3SeriesControlSystems.ToArray())
+    $devicesToBackup.AddRange($4SeriesControlSystems.ToArray())
+    $devicesToBackup.AddRange($touchPanels.ToArray())
 
     if ($devicesToBackup) {
         try {
