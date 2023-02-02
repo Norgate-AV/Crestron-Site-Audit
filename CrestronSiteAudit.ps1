@@ -552,6 +552,8 @@ if ($BackupDeviceFiles) {
     $devicesToBackup.AddRange($touchPanels.ToArray())
 
     if ($devicesToBackup) {
+        Write-Console -Message "notice: Backing up $($devicesToBackup.Count) devices" -ForegroundColor Yellow
+
         try {
             $script = Get-Content -Path $getDeviceFilesScriptBlock -Raw -ErrorAction Stop
 
