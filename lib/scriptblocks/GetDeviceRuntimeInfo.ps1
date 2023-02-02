@@ -88,7 +88,7 @@ try {
         $controlSubnetPortMap = Get-CrestronPersistentPort @deviceParams -All
 
         $controlSubnetInfo = [PSCustomObject] @{
-            DhcpLeases     = $device | Get-ControlSubnetDhcpLeases
+            DhcpLeases     = ($device | Get-ControlSubnetDhcpLeaseList).Leases
             ReservedLeases = $device | Get-ControlSubnetReservedLeases
             PortMap        = $controlSubnetPortMap
         }
