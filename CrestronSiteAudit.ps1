@@ -485,8 +485,7 @@ $4SeriesControlSystems += $controlSystems | Where-Object { $_.Series -eq $Series
 ################################################################################
 # Filter Touch Panels
 ################################################################################
-$touchPanels = @()
-$touchPanels += $devicesWithoutErrors | Select-TouchPanel
+$touchPanels = [List[PSCustomObject]]::new($devicesWithoutErrors.Where({ Select-TouchPanel -Device $_ }))
 if ($touchPanels) {
     Format-SectionHeader -Title "TOUCH PANELS"
     Set-HostForeGroundColour -Colour Green
