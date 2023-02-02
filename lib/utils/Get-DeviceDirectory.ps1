@@ -35,19 +35,27 @@ function Get-DeviceDirectory {
 
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [PSCustomObject] $Device,
+        [PSCustomObject]
+        $Device,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $OutputDirectory
+        [string]
+        $OutputDirectory
     )
 
-    if ($Device.HostName) {
-        $deviceDirectoryName = "$($device.Hostname) - $($device.IPAddress)"
-    }
-    else {
-        $deviceDirectoryName = $device.IPAddress
+    begin {}
+
+    process {
+        if ($Device.HostName) {
+            $deviceDirectoryName = "$($device.Hostname) - $($device.IPAddress)"
+        }
+        else {
+            $deviceDirectoryName = $device.IPAddress
+        }
     }
 
-    return Join-Path -Path $OutputDirectory -ChildPath $deviceDirectoryName
+    end {
+        return Join-Path -Path $OutputDirectory -ChildPath $deviceDirectoryName
+    }
 }
