@@ -681,11 +681,11 @@ Format-SectionHeader -Title "SUMMARY IN $($timespan.ToString("h'h 'm'm 's's'"))"
 Set-HostForeGroundColour -Colour Green
 $devicesWithoutErrors | Format-Table -Property IPAddress, Category, Hostname, Prompt, MACAddress, VersionOS, ProgramFile, SourceFile, Programmer, CompiledOn
 
-Write-Output "Total Control Systems: $(@($controlSystems).Count)"
-Write-Output "Total 2-Series Control Systems: $(@($2SeriesControlSystems).Count)"
-Write-Output "Total 3-Series Control Systems: $(@($3SeriesControlSystems).Count)"
-Write-Output "Total 4-Series Control Systems: $(@($4SeriesControlSystems).Count)"
-Write-Output "Total Touch Panels: $(@($touchPanels).Count)"
+Write-Output "Total Control Systems: $($controlSystems.Count)"
+Write-Output "Total 2-Series Control Systems: $($2SeriesControlSystems.Count)"
+Write-Output "Total 3-Series Control Systems: $($3SeriesControlSystems.Count)"
+Write-Output "Total 4-Series Control Systems: $($4SeriesControlSystems.Count)"
+Write-Output "Total Touch Panels: $($touchPanels.Count)"
 
 Set-HostForeGroundColour
 
