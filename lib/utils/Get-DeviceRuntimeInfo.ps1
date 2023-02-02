@@ -83,10 +83,6 @@ function Get-DeviceRuntimeInfo {
             if ($session) {
                 Close-CrestronSession -Handle $session
             }
-
-            if ($builder) {
-                $builder = $null
-            }
         }
     }
 
