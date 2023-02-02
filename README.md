@@ -1,8 +1,8 @@
 # Crestron-Site-Audit
 
-<!-- <div align="center">
-    <img src="" alt="" width="150" />
-</div> -->
+<div align="center">
+    <img src="./assets/img/powershell_logo-1024x1024.png" alt="" width="150" />
+</div>
 
 ---
 
