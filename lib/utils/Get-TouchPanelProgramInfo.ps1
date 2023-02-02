@@ -35,7 +35,8 @@ function Get-TouchPanelProgramInfo {
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [ValidateNotNullOrEmpty()]
-        [PSCustomObject] $Device
+        [PSCustomObject]
+        $Device
     )
 
     begin {
