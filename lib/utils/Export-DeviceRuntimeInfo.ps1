@@ -56,7 +56,7 @@ function Export-DeviceRuntimeInfo {
         if ($Device.ProgramInfo) {
             $programInfoFile = Join-Path -Path $deviceDirectory -ChildPath "Programs.xlsx"
             $Device.ProgramInfo | Export-Excel -Path $programInfoFile @ExcelParams
-            Write-Verbose "notice: [$($Device.Device)] => Program Count: $(@($Device.ProgramInfo | Where-Object { $_.ProgramFile -ne "No Program" }).Count)"
+            Write-Verbose "notice: [$($Device.Device)] => Program Count: $($Device.ProgramInfo.Count)"
         }
 
         if ($Device.IPTableInfo) {

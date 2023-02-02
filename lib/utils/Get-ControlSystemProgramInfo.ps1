@@ -29,6 +29,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+using namespace System.Collections.Generic
+
 function Convert-ProgramInfo {
 
     [CmdletBinding()]
@@ -84,7 +86,10 @@ function Get-ControlSystemProgramInfo {
     )
 
     begin {
-        $programInfoList = @()
+        $result = @{
+            Exception       = $null
+            ProgramInfoList = $null
+        }
     }
 
     process {
@@ -99,24 +104,50 @@ function Get-ControlSystemProgramInfo {
             $session = Open-CrestronSession @params
 
             if ($Device.Series -ge $Series.Series3) {
-            (1..10) | ForEach-Object {
+            (0..10) | ForEach-Object {
                     $response = Invoke-CrestronSession $session "progcomments:$_"
+
+                    if ($response -match "error:") {
+                        return
+                    }
 
                     $programInfo = Convert-ProgramInfo -Device $Device -ConsoleResponse $response
 
-                    $programInfoList += $programInfo
+                    if ($programInfo -eq $null) {
+                        return
+                    }
+
+                    if ($result.ProgramInfoList -eq $null) {
+                        $result.ProgramInfoList = [List[PSCustomObject]]::new()
+                    }
+
+                    $result.ProgramInfoList.Add($programInfo)
                 }
             }
             else {
-                $response = Invoke-CrestronSession $session "progcomments"
+                {
+                    $response = Invoke-CrestronSession $session "progcomments"
 
-                $programInfo = Convert-ProgramInfo -Device $Device -ConsoleResponse $response
+                    if ($response -match "error:") {
+                        return
+                    }
 
-                $programInfoList += $programInfo
+                    $programInfo = Convert-ProgramInfo -Device $Device -ConsoleResponse $response
+
+                    if ($programInfo -eq $null) {
+                        return
+                    }
+
+                    if ($result.ProgramInfoList -eq $null) {
+                        $result.ProgramInfoList = [List[PSCustomObject]]::new()
+                    }
+
+                    $result.ProgramInfoList.Add($programInfo)
+                }
             }
         }
         catch {
-
+            $result.Exception = $_.Exception
         }
         finally {
             if ($session) {
@@ -126,6 +157,6 @@ function Get-ControlSystemProgramInfo {
     }
 
     end {
-        return $programInfoList
+        return $result
     }
 }

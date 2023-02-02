@@ -75,7 +75,7 @@ try {
 
         $controlSystem.IPAddress = $controlSystem.IPAddress | Invoke-NormalizeIPAddress
 
-        $programInfo = $controlSystem | Get-ControlSystemProgramInfo
+        [List[PSCustomObject]] $programInfo = ($controlSystem | Get-ControlSystemProgramInfo).ProgramInfoList
 
         $versionInfo | Add-Member ProgramInfo $programInfo
         foreach ($property in $programInfo[0].PSObject.Properties | Where-Object { $_.Name -ne "Device" }) {
