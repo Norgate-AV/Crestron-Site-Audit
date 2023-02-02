@@ -32,7 +32,6 @@ SOFTWARE.
 using namespace System.Collections.Generic
 
 function Convert-ProgramInfo {
-
     [CmdletBinding()]
 
     param(
