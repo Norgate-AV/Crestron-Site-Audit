@@ -5,6 +5,7 @@
         "PSUseOutputTypeCorrectly",
         "PSAvoidUsingUserNameAndPassWordParams",
         "PSAvoidUsingPlainTextForPassword",
-        "PSAvoidUsingWriteHost"
+        "PSAvoidUsingWriteHost",
+        "PSPossibleIncorrectComparisonWithNull"
     )
 }
