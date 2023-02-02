@@ -29,6 +29,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+using namespace System.Collections.Generic
+
 function Get-EnvironmentFileVariableList {
     [CmdletBinding()]
 
@@ -40,8 +42,6 @@ function Get-EnvironmentFileVariableList {
     )
 
     $File = Resolve-Path -Path $File
-
-    $variableList = @()
 
     $pattern = [regex] '^(?<variable>[\w]+)=(?<value>.+)$'
 
@@ -58,13 +58,17 @@ function Get-EnvironmentFileVariableList {
         throw "No variables found in environment file."
     }
 
+    $variableList = [List[PSCustomObject]]::new()
+
     $patternMatches | ForEach-Object {
         $match = $_
 
-        $variableList += [PSCustomObject] @{
+        $variable = [PSCustomObject] @{
             Variable = $match.Groups["variable"].Value
             Value    = $match.Groups["value"].Value.Trim()
         }
+
+        $variableList.Add($variable)
     }
 
     return $variableList
