@@ -56,7 +56,7 @@ function Get-TouchPanelProgramInfo {
             },
             [PSCustomObject] @{
                 Name       = "~.Manifest.dat"
-                Pattern    = '(?<path>[a-zA-Z]:[\\\w \d\.-]+\.vtz)'
+                Pattern    = '(?<path>(?<=[a-zA-Z]:[\s\S]+\.vtp.*?)[a-zA-Z]:[\s\S]+\.vtz)'
                 Properties = @{
                     SourceFile = "path"
                 }
