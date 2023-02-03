@@ -37,6 +37,7 @@ function New-ManifestFromToolboxAddressBook {
     param(
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
+        [ValidatePattern(".+\.(xadr)$")]
         [string]
         $AddressBook
     )
