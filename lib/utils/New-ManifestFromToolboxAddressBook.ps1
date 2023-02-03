@@ -29,6 +29,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+using namespace System.Collections.Generic
+
 function New-ManifestFromToolboxAddressBook {
     [CmdletBinding()]
 
@@ -40,20 +42,20 @@ function New-ManifestFromToolboxAddressBook {
     )
 
     $manifest = [PSCustomObject] @{
-        credentials = @()
-        devices     = @()
+        credentials = [List[PSCustomObject]]::new()
+        devices     = [List[PSCustomObject]]::new()
     }
 
     try {
-        $devices = Read-ToolboxAddressBook -AddressBook $AddressBook
+        [List[PSCustomObject]] $devices = Read-ToolboxAddressBook -AddressBook $AddressBook
 
         $devices | ForEach-Object {
             $device = $_
-            $manifest.devices += [PSCustomObject] @{
-                address      = $device.Address
-                secure       = ($device.Connection -eq "ssh" -or $device.Connection -eq "ssl" -or $device.Username -ne "")
-                credentialId = ""
-            }
+            $manifest.devices.Add([PSCustomObject] @{
+                    address      = $device.Address
+                    secure       = ($device.Connection -eq "ssh" -or $device.Connection -eq "ssl" -or $device.Username -ne "")
+                    credentialId = ""
+                })
         }
 
         if ($devices.Username.Count -eq 0) {
@@ -84,7 +86,7 @@ function New-ManifestFromToolboxAddressBook {
             $encryptedCredential = "$($device.Username):$($device.Password)" | Invoke-Aes256Encrypt -Key $env:AES_KEY
 
             if ($encryptedCredential -in $manifest.credentials.credential) {
-                $manifest.devices | Where-Object { $_.address -eq $device.Address } | ForEach-Object {
+                $manifest.devices.Where({ $_.address -eq $device.Address }) | ForEach-Object {
                     $_.credentialId = $manifest.credentials | `
                         Where-Object { $_.credential -eq $encryptedCredential } | `
                         Select-Object -ExpandProperty id
@@ -99,7 +101,7 @@ function New-ManifestFromToolboxAddressBook {
                 credential = $encryptedCredential
             }
 
-            $manifest.credentials += $credential
+            $manifest.credentials.Add($credential)
 
             $manifest.devices | Where-Object { $_.address -eq $device.Address } | ForEach-Object {
                 $_.credentialId = $credential.id

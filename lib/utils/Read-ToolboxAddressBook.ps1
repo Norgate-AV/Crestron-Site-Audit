@@ -29,6 +29,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+using namespace System.Collections.Generic
+
 function Get-ToolboxAddressBookDataList {
     [CmdletBinding()]
 
@@ -73,8 +75,6 @@ function Convert-ToolboxAddressBookDeviceList {
         $DeviceList
     )
 
-    $devices = @()
-
     $pattern = [regex] '(?:(?<name>[\w\d\. _-]+)=(?<connection>[\w]+) (?<address>[\w\d\. _-]+)(?:,(?<port>\d+))?(?:;\w+ (?<username>[\w\d]+))?(?:;\w+ (?<password>[\w\d!@£$%^&*#_-]+))?(?:;console (?<console>\w+))?(?:;\w+ (?<pat_connection>\w+),)?(?:(?<pat_hostname>[\w\d\. _-]+),?)?(?:(?<pat_port>\d+))?)'
 
     $patternMatches = $pattern.Matches($deviceList)
@@ -83,10 +83,12 @@ function Convert-ToolboxAddressBookDeviceList {
         throw "No devices found in address book."
     }
 
+    $devices = [List[PSCustomObject]]::new()
+
     $patternMatches | ForEach-Object {
         $match = $_
 
-        $devices += [PSCustomObject] @{
+        $device = [PSCustomObject] @{
             Name          = $match.Groups["name"].Value.Trim()
             Connection    = $match.Groups["connection"].Value.Trim()
             Address       = $match.Groups["address"].Value.Trim()
@@ -98,6 +100,8 @@ function Convert-ToolboxAddressBookDeviceList {
             PATHostname   = $match.Groups["pat_hostname"].Value.Trim()
             PATPort       = $match.Groups["pat_port"].Value.Trim()
         }
+
+        $devices.Add($device)
     }
 
     return $devices
@@ -109,7 +113,7 @@ function Convert-ToolboxAddressBookCommentList {
     param(
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [PSCustomObject[]]
+        [List[PSCustomObject]]
         $Devices,
 
         [Parameter(Mandatory = $true)]
@@ -129,7 +133,7 @@ function Convert-ToolboxAddressBookCommentList {
     $patternMatches | ForEach-Object {
         $match = $_
 
-        $device = $Devices | Where-Object { $_.Name -eq $match.Groups["name"].Value.Trim() }
+        $device = $Devices.Where({ $_.Name -eq $match.Groups["name"].Value.Trim() })
 
         if ($device) {
             $device | Add-Member Comment $match.Groups["comment"].Value.Trim()
@@ -141,6 +145,7 @@ function Convert-ToolboxAddressBookCommentList {
 
 function Read-ToolboxAddressBook {
     [CmdletBinding()]
+    [OutputType([List[PSCustomObject]])]
 
     param(
         [Parameter(Mandatory = $true)]
@@ -148,8 +153,6 @@ function Read-ToolboxAddressBook {
         [string]
         $AddressBook
     )
-
-    $devices = @()
 
     try {
         $AddressBook = Resolve-Path -Path $AddressBook
@@ -163,7 +166,7 @@ function Read-ToolboxAddressBook {
 
         $deviceList = $content | Get-ToolboxAddressBookDataList -Pattern '\[ComSpecs\](?<list>[\s\S]+)\[Notes\]'
 
-        $devices += Convert-ToolboxAddressBookDeviceList -DeviceList $deviceList
+        $devices = Convert-ToolboxAddressBookDeviceList -DeviceList $deviceList
 
         $commentList = $content | Get-ToolboxAddressBookDataList -Pattern '\[Notes\](?<list>[\s\S]+)(?:\[ExtComSpecs\])?'
 
