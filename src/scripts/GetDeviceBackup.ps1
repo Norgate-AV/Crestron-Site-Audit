@@ -31,8 +31,8 @@ SOFTWARE.
 
 $device = $_
 
-# $cwd = $using:PSScriptRoot
-# $moduleName = $using:moduleName
+$cwd = $using:PSScriptRoot
+$moduleName = $using:moduleName
 $filter = $using:Filter
 $logsOnly = $using:LogsOnly
 
@@ -42,7 +42,7 @@ $result = @{
 }
 
 try {
-    # Import-Module "$cwd/$moduleName.psm1" -Force
+    Import-Module "$cwd/$moduleName.psm1" -Force
 
     if ($device.ErrorMessage) {
         return $result
