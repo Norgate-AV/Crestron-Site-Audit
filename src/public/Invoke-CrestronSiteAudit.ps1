@@ -364,6 +364,12 @@ function Invoke-CrestronSiteAudit {
         Append       = $true
     }
 
+    $commonJobParams = @{
+        Throttle        = 100
+        ModulesToImport = @($crestronModule.Name)
+    }
+
+
 
     ################################################################################
     # Gather initial device information
@@ -371,21 +377,10 @@ function Invoke-CrestronSiteAudit {
     Format-SectionHeader -Title "TASK [Getting Device Information]"
     $deviceList = [List[PSCustomObject]]::new()
 
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'moduleName', Justification = 'Referenced in scriptblock.')]
-    $moduleName = $MyInvocation.MyCommand.ModuleName
-
-    $commonJobParams = @{
-        Throttle        = 100
-        ModulesToImport = @($crestronModule.Name)
-    }
-
     try {
-        # $script = Get-Content -Path $getDeviceInfoScriptBlock -Raw -ErrorAction Stop
-
         $thisJobParams = @{
             Name     = { "GetDeviceInfo-[$($_.address)]" }
-            # ScriptBlock = [ScriptBlock]::Create($script)
-            FilePath = $getDeviceInfoScriptBlock
+            FilePath = "$PSScriptRoot/scripts/GetDeviceInfo.ps1"
         }
 
         $devices | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
@@ -490,12 +485,9 @@ function Invoke-CrestronSiteAudit {
     Format-SectionHeader -Title "TASK [Getting Runtime Information]"
 
     try {
-        # $script = Get-Content -Path $getDeviceRuntimeInfoScriptBlock -Raw -ErrorAction Stop
-
         $thisJobParams = @{
             Name     = { "GetDeviceRuntimeInfo-[$($_.Device)]" }
-            # ScriptBlock = [ScriptBlock]::Create($script)
-            FilePath = $getDeviceRuntimeInfoScriptBlock
+            FilePath = "$PSScriptRoot/scripts/GetDeviceRuntimeInfo.ps1"
         }
 
         $devicesWithoutErrors | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
@@ -542,12 +534,9 @@ function Invoke-CrestronSiteAudit {
             Write-Console -Message "notice: Backing up $($devicesToBackup.Count) devices" -ForegroundColor Yellow
 
             try {
-                # $script = Get-Content -Path $getDeviceFilesScriptBlock -Raw -ErrorAction Stop
-
                 $thisJobParams = @{
                     Name     = { "GetDeviceBackup-[$($_.Device)]" }
-                    # ScriptBlock = [ScriptBlock]::Create($script)
-                    FilePath = $getDeviceFilesScriptBlock
+                    FilePath = "$PSScriptRoot/scripts/GetDeviceBackup.ps1"
                 }
 
                 $devicesToBackup | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
@@ -589,12 +578,9 @@ function Invoke-CrestronSiteAudit {
     $newDevices = @()
 
     try {
-        # $script = Get-Content -Path $getDeviceAutoDiscoveryScriptBlock -Raw -ErrorAction Stop
-
         $thisJobParams = @{
             Name     = { "GetDeviceAutoDiscovery-[$($_.Device)]" }
-            # ScriptBlock = [ScriptBlock]::Create($script)
-            FilePath = $getDeviceAutoDiscoveryScriptBlock
+            FilePath = "$PSScriptRoot/scripts/GetDeviceAutoDiscovery.ps1"
         }
 
         $controlSystems | Where-Object { $_.Series -ge $Series.Series3 } | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
