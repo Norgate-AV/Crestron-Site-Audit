@@ -23,7 +23,7 @@ jobs:
         run: |
           $PSVersionTable
       
-      - name: Run Build
+      - name: Run Tests
         shell: powershell
         run: |
-          .\build.ps1
+          .\build.ps1 -Task Test
