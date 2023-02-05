@@ -162,7 +162,49 @@ function Invoke-CrestronSiteAudit {
     # Invoke PSDepend to resolve dependencies
     ################################################################################
     try {
-        Invoke-PSDepend -Path $PSScriptRoot -Force -Verbose:$false
+        Get-Dependency | ForEach-Object {
+            if ($_.Name -in $loadedModules.Name) {
+                Write-Console -Message "ok: $($_.Name) is installed and imported" -ForegroundColor Green
+                return
+            }
+
+            if ($_.Name -in $availableModules.Name) {
+                Write-Verbose "notice: $($_.Name) is not imported"
+                Write-Verbose "notice: Importing now..."
+
+                try {
+                    Import-Module -Name $_.Name -Force -Verbose:$false
+                }
+                catch {
+                    throw "Failed to import $($_.Name) => $($_.Exception.GetBaseException().Message)"
+                }
+
+                Write-Console -Message "ok: $($_.Name) is installed and imported" -ForegroundColor Green
+                return
+            }
+
+            Write-Verbose "notice: $($_.Name) is not installed"
+            Write-Verbose "notice: Installing now..."
+
+            try {
+                Install-Dependency -Dependency $_ -Verbose:$false
+            }
+            catch {
+                throw "Failed to install $($_.Name) => $($_.Exception.GetBaseException().Message)"
+            }
+
+            Write-Verbose "notice: $($_.Name) installed"
+            Write-Verbose "notice: Importing now..."
+
+            try {
+                Import-Module -Name $_.Name -Force -Verbose:$false
+            }
+            catch {
+                throw "Failed to import $($_.Name) => $($_.Exception.GetBaseException().Message)"
+            }
+
+            Write-Console -Message "ok: $($_.Name) is installed and imported" -ForegroundColor Green
+        }
     }
     catch {
         Write-Console -Message "error: PSDepend dependency resolution failed: $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
