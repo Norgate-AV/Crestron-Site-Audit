@@ -82,11 +82,10 @@ function Invoke-CrestronSiteAudit {
                 Import-Module -Name $_.FullName -Force -Verbose:$false
             }
             catch {
-                Write-Console -Message "error: Failed to import local module => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
-                return
+                Write-Console -Message "warning: Failed to import local module => $($_.Exception.GetBaseException().Message)" -ForegroundColor Yellow
             }
 
-            Write-Verbose "notice: Imported local module => $($_.Name)"
+            Write-Console -Message "ok: Imported local module => $($_.Name)" -ForegroundColor Green
         }
     }
 
