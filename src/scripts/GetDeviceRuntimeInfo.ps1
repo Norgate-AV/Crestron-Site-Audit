@@ -32,6 +32,7 @@ SOFTWARE.
 $device = $_
 
 $cwd = $using:PSScriptRoot
+$moduleName = $using:moduleName
 
 $result = @{
     Device    = $device
@@ -39,7 +40,7 @@ $result = @{
 }
 
 try {
-    Import-Module $(Resolve-Path -Path "$cwd/CrestronSiteAudit.psd1")
+    Import-Module -Name "$cwd/$moduleName.psm1" -Force
 
     if ($device.ErrorMessage) {
         return $result
@@ -54,7 +55,7 @@ try {
 
     $controlSystem = $device | Select-ControlSystem
     if ($controlSystem) {
-        $commands = Import-LocalizedData -FileName ControlSystemCommands -BaseDirectory "$cwd/Commands"
+        $commands = Import-PowerShellDataFile -Path "$cwd/data/ControlSystemCommands.psd1"
         $runtimeInfoResult = $device | Get-DeviceRuntimeInfo -Commands $commands
 
         if (!$runtimeInfoResult.Exception) {
@@ -69,7 +70,7 @@ try {
 
     $touchPanel = $device | Select-TouchPanel
     if ($touchPanel) {
-        $commands = Import-LocalizedData -FileName TouchPanelCommands -BaseDirectory "$cwd/Commands"
+        $commands = Import-PowerShellDataFile -Path "$cwd/data/TouchPanelCommands.psd1"
         $runtimeInfoResult = $device | Get-DeviceRuntimeInfo -Commands $commands
 
         if (!$runtimeInfoResult.Exception) {

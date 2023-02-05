@@ -6,7 +6,7 @@ param (
     $Task = 'Default'
 )
 
-$modules = @("PSake", "PSDeploy", "BuildHelpers", "ModuleBuilder", "Pester", "PlatyPS")
+$modules = @("PSake", "PSDeploy", "BuildHelpers", "ModuleBuilder", "Pester", "PlatyPS", "Metadata", "Configuration")
 
 foreach ($module in $modules) {
     try {
@@ -19,6 +19,8 @@ foreach ($module in $modules) {
 }
 
 Set-BuildEnvironment -BuildOutput "build" -ErrorAction SilentlyContinue
+
+Remove-Module $env:BHProjectName -Force -ErrorAction SilentlyContinue
 
 Invoke-PSake -BuildFile "$env:BHProjectPath/psake.ps1" -TaskList $Task -Verbose
 exit ( [int]( !$psake.build_success ) )

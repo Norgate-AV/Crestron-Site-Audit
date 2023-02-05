@@ -31,7 +31,8 @@ SOFTWARE.
 
 $device = $_
 
-$cwd = $using:PSScriptRoot
+# $cwd = $using:PSScriptRoot
+# $moduleName = $using:moduleName
 $filter = $using:Filter
 $logsOnly = $using:LogsOnly
 
@@ -41,7 +42,7 @@ $result = @{
 }
 
 try {
-    Import-Module $(Resolve-Path -Path "$cwd/CrestronSiteAudit.psd1")
+    # Import-Module "$cwd/$moduleName.psm1" -Force
 
     if ($device.ErrorMessage) {
         return $result

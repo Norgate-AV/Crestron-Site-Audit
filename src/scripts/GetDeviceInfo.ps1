@@ -33,6 +33,7 @@ $device = $_
 
 $credentials = $using:credentials
 $cwd = $using:PSScriptRoot
+$moduleName = $using:moduleName
 
 $result = @{
     Device     = $device
@@ -41,7 +42,7 @@ $result = @{
 }
 
 try {
-    Import-Module $(Resolve-Path -Path "$cwd/CrestronSiteAudit.psd1")
+    Import-Module "$cwd/$moduleName.psm1" -Force
 
     $deviceCredential = Get-DeviceCredential -Credentials $credentials -Id $device.credentialId
 

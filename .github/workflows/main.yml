@@ -2,14 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [master]
   pull_request:
     branches: [master]
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build, lint, and test on ${{ matrix.os }}
+    name: Build and Test on ${{ matrix.os }}
 
     runs-on: ${{ matrix.os }}
 
@@ -25,3 +24,13 @@ jobs:
         shell: powershell
         run: |
           $PSVersionTable
+
+      - name: Run Build
+        shell: powershell
+        run: |
+          .\build.ps1 -Task Build
+
+      - name: Run Tests
+        shell: powershell
+        run: |
+          .\build.ps1 -Task Test

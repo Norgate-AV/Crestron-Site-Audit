@@ -64,7 +64,17 @@ Task Build -Depends Init {
 
     $buildParams = @{
         SourcePath                 = $env:BHPSModuleManifest
-        CopyPaths                  = @("commands", "scripts", "schema")
+        SourceDirectories          = @("public", "private")
+        CopyPaths                  = @(
+            "data",
+            "scripts",
+            "schema",
+            "../LICENSE",
+            "../README.md",
+            # "../CrestronSiteAudit.depend.psd1",
+            "../.env.sample",
+            "../manifest.json.sample"
+        )
         OutputDirectory            = $env:BHBuildOutput
         UnversionedOutputDirectory = $true
         Verbose                    = $true

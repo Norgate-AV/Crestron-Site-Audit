@@ -63,28 +63,6 @@ function Invoke-CrestronSiteAudit {
 
 
     ################################################################################
-    # Source library utilities
-    ################################################################################
-    # try {
-    #     $libDirectory = Join-Path -Path $PSScriptRoot -ChildPath "private"
-    #     $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
-
-    #     if (!(Test-Path -Path $utilsDirectory)) {
-    #         throw "Cannot find path '$utilsDirectory' because it does not exist."
-    #     }
-
-    #     Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-    #         Write-Verbose "notice: Sourcing => $($_.FullName)"
-    #         . $_.FullName
-    #     }
-    # }
-    # catch {
-    #     Write-Host "error: Failed to source library utilities => $($_.Exception.GetBaseException().Message)" -ForegroundColor Red
-    #     exit 1
-    # }
-
-
-    ################################################################################
     # Start pre-script checks
     ################################################################################
     Format-SectionHeader -Title "PRE-SCRIPT CHECKS"
@@ -94,7 +72,7 @@ function Invoke-CrestronSiteAudit {
     # Check scriptblock files exist
     ################################################################################
     try {
-        $scriptBlockDirectory = Join-Path -Path $PSScriptRoot -ChildPath "Scripts"
+        $scriptBlockDirectory = Join-Path -Path $PSScriptRoot -ChildPath "scripts"
 
         if (!(Test-Path -Path $scriptBlockDirectory)) {
             throw "Cannot find path '$scriptBlockDirectory' because it does not exist."
@@ -127,10 +105,10 @@ function Invoke-CrestronSiteAudit {
 
 
     ################################################################################
-    # Check command files exist
+    # Check data files exist
     ################################################################################
     try {
-        $commandsDirectory = Join-Path -Path $PSScriptRoot -ChildPath "commands"
+        $commandsDirectory = Join-Path -Path $PSScriptRoot -ChildPath "data"
 
         if (!(Test-Path -Path $commandsDirectory)) {
             throw "Cannot find path '$commandsDirectory' because it does not exist."
@@ -165,7 +143,6 @@ function Invoke-CrestronSiteAudit {
     if ($localModules) {
         $localModulesList = [List[PSObject]]::new()
         $localModulesList.Add($localModules)
-        # $localModules.AddRange(@(Get-ChildItem -Path $PSScriptRoot | Select-LocalModule))
 
         $localModulesList | ForEach-Object {
             try {
@@ -266,7 +243,6 @@ function Invoke-CrestronSiteAudit {
     # Check the manifest file exists
     ################################################################################
     try {
-        # $ManifestFile = Resolve-Path -Path $ManifestFile -ErrorAction Stop
         $ManifestFile = Find-Up -FileName $ManifestFile
     }
     catch {
@@ -395,17 +371,21 @@ function Invoke-CrestronSiteAudit {
     Format-SectionHeader -Title "TASK [Getting Device Information]"
     $deviceList = [List[PSCustomObject]]::new()
 
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'moduleName', Justification = 'Referenced in scriptblock.')]
+    $moduleName = $MyInvocation.MyCommand.ModuleName
+
     $commonJobParams = @{
         Throttle        = 100
         ModulesToImport = @($crestronModule.Name)
     }
 
     try {
-        $script = Get-Content -Path $getDeviceInfoScriptBlock -Raw -ErrorAction Stop
+        # $script = Get-Content -Path $getDeviceInfoScriptBlock -Raw -ErrorAction Stop
 
         $thisJobParams = @{
-            Name        = { "GetDeviceInfo-[$($_.address)]" }
-            ScriptBlock = [ScriptBlock]::Create($script)
+            Name     = { "GetDeviceInfo-[$($_.address)]" }
+            # ScriptBlock = [ScriptBlock]::Create($script)
+            FilePath = $getDeviceInfoScriptBlock
         }
 
         $devices | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
@@ -510,11 +490,12 @@ function Invoke-CrestronSiteAudit {
     Format-SectionHeader -Title "TASK [Getting Runtime Information]"
 
     try {
-        $script = Get-Content -Path $getDeviceRuntimeInfoScriptBlock -Raw -ErrorAction Stop
+        # $script = Get-Content -Path $getDeviceRuntimeInfoScriptBlock -Raw -ErrorAction Stop
 
         $thisJobParams = @{
-            Name        = { "GetDeviceRuntimeInfo-[$($_.Device)]" }
-            ScriptBlock = [ScriptBlock]::Create($script)
+            Name     = { "GetDeviceRuntimeInfo-[$($_.Device)]" }
+            # ScriptBlock = [ScriptBlock]::Create($script)
+            FilePath = $getDeviceRuntimeInfoScriptBlock
         }
 
         $devicesWithoutErrors | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
@@ -561,11 +542,12 @@ function Invoke-CrestronSiteAudit {
             Write-Console -Message "notice: Backing up $($devicesToBackup.Count) devices" -ForegroundColor Yellow
 
             try {
-                $script = Get-Content -Path $getDeviceFilesScriptBlock -Raw -ErrorAction Stop
+                # $script = Get-Content -Path $getDeviceFilesScriptBlock -Raw -ErrorAction Stop
 
                 $thisJobParams = @{
-                    Name        = { "GetDeviceBackup-[$($_.Device)]" }
-                    ScriptBlock = [ScriptBlock]::Create($script)
+                    Name     = { "GetDeviceBackup-[$($_.Device)]" }
+                    # ScriptBlock = [ScriptBlock]::Create($script)
+                    FilePath = $getDeviceFilesScriptBlock
                 }
 
                 $devicesToBackup | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
@@ -607,11 +589,12 @@ function Invoke-CrestronSiteAudit {
     $newDevices = @()
 
     try {
-        $script = Get-Content -Path $getDeviceAutoDiscoveryScriptBlock -Raw -ErrorAction Stop
+        # $script = Get-Content -Path $getDeviceAutoDiscoveryScriptBlock -Raw -ErrorAction Stop
 
         $thisJobParams = @{
-            Name        = { "GetDeviceAutoDiscovery-[$($_.Device)]" }
-            ScriptBlock = [ScriptBlock]::Create($script)
+            Name     = { "GetDeviceAutoDiscovery-[$($_.Device)]" }
+            # ScriptBlock = [ScriptBlock]::Create($script)
+            FilePath = $getDeviceAutoDiscoveryScriptBlock
         }
 
         $controlSystems | Where-Object { $_.Series -ge $Series.Series3 } | Start-RSJob @commonJobParams @thisJobParams | Wait-RSJob | Receive-RSJob | ForEach-Object {
