@@ -1,5 +1,6 @@
 Properties {
     $ProjectRoot = $ENV:BHProjectPath
+
     if (!$ProjectRoot) {
         $ProjectRoot = $PSScriptRoot
     }
@@ -10,7 +11,7 @@ Properties {
         $script:IsWindows = (!(Get-Variable -Name IsWindows -ErrorAction Ignore)) -or $IsWindows
         $script:IsLinux = (Get-Variable -Name IsLinux -ErrorAction Ignore) -and $IsLinux
         $script:IsMacOS = (Get-Variable -Name IsMacOS -ErrorAction Ignore) -and $IsMacOS
-        $script:IsCoreCLR = $PSVersionTable.ContainsKey('PSEdition') -and $PSVersionTable.PSEdition -eq 'Core'
+        $script:IsCoreCLR = $PSVersionTable.ContainsKey("PSEdition") -and $PSVersionTable.PSEdition -eq "Core"
     }
     catch {
         Write-Error -Message "Failed to set platform variables: $_"
@@ -19,7 +20,7 @@ Properties {
     $Timestamp = Get-Date -UFormat "%Y%m%d-%H%M%S"
     $PSVersion = $PSVersionTable.PSVersion.Major
     $TestFile = "TestResults_PS$PSVersion`_$TimeStamp.xml"
-    $lines = '----------------------------------------------------------------------'
+    $lines = "----------------------------------------------------------------------"
 
     $Verbose = @{}
     if ($env:BHCommitMessage -match "!verbose") {
@@ -71,7 +72,7 @@ Task Build -Depends Init {
             "schema",
             "../LICENSE",
             "../README.md",
-            # "../CrestronSiteAudit.depend.psd1",
+            "../CrestronSiteAudit.depend.psd1",
             "../.env.sample",
             "../manifest.json.sample"
         )
@@ -87,22 +88,14 @@ Task Build -Depends Init {
 Task Deploy -Depends Test {
     $lines
 
-    if (
-        $ENV:BHBuildSystem -ne 'Unknown' -and
-        $ENV:BHBranchName -eq "master" -and
-        $ENV:BHCommitMessage -match '!deploy'
-    ) {
-        $Params = @{
-            Path  = $ProjectRoot
-            Force = $true
-        }
+    if ($env:BHBuildSystem -eq 'Unknown' -or $env:BHBranchName -ne "master") {
+        Write-Output @"
+        Skipping deployment: To deploy, ensure that...
+            You are in a known build system (Current: $env:BHBuildSystem)
+            You are committing to the master branch (Current: $env:BHBranchName)
+"@
+        return
+    }
 
-        Invoke-PSDeploy @Verbose @Params
-    }
-    else {
-        "Skipping deployment: To deploy, ensure that...`n" +
-        "`t* You are in a known build system (Current: $ENV:BHBuildSystem)`n" +
-        "`t* You are committing to the master branch (Current: $ENV:BHBranchName) `n" +
-        "`t* Your commit message includes !deploy (Current: $ENV:BHCommitMessage)"
-    }
+    "Deploying"
 }
