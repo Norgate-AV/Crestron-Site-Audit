@@ -25,3 +25,6 @@ manifest.json
 
 # Exclude PSDepend folder
 /.psdepend
+
+# Exclude build folder
+/build
