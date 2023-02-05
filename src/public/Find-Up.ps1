@@ -29,30 +29,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-Sha256Hash {
+function Find-Up {
     [CmdletBinding()]
 
-    param (
+    param(
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]
-        $Data
+        $FileName,
+
+        [Parameter(Mandatory = $false)]
+        [string]
+        $Path = $PWD
     )
 
-    try {
-        $hasher = [System.Security.Cryptography.HashAlgorithm]::Create('sha256')
-        $hash = $hasher.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($Data))
-    }
-    catch {
-        throw "Failed to create SHA256 hash: $($_.Exception.GetBaseException().Message)"
-    }
-    finally {
-        $hasher.Dispose()
+    $Path = Resolve-Path -Path $Path
+
+    while ($Path) {
+        $file = Join-Path -Path $Path -ChildPath $FileName
+
+        if (Test-Path -Path $file) {
+            return $file
+        }
+
+        $Path = Split-Path -Path $Path -Parent
     }
 
-    return $hash
-}
-
-if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    Get-Sha256Hash @args
+    return $null
 }

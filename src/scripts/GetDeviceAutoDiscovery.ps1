@@ -32,8 +32,6 @@ SOFTWARE.
 $device = $_
 
 $cwd = $using:PSScriptRoot
-$filter = $using:Filter
-$logsOnly = $using:LogsOnly
 
 $result = @{
     Device    = $device
@@ -41,18 +39,23 @@ $result = @{
 }
 
 try {
-    $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
-    $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
-
-    Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-        . $_.FullName
-    }
+    Import-Module $(Resolve-Path -Path "$cwd/CrestronSiteAudit.psd1")
 
     if ($device.ErrorMessage) {
         return $result
     }
 
-    $device | Get-DeviceBackup -OutputDirectory $device.DeviceDirectory -Filter $filter -LogsOnly:$logsOnly
+    $deviceParams = @{
+        Device   = $device.IPAddress
+        Secure   = $device.Secure
+        Username = $device.Credential.Username
+        Password = $device.Credential.Password
+    }
+
+    $discoveredDevices = Read-AutoDiscovery @deviceParams
+    $device | Add-Member DiscoveredDevices $discoveredDevices
+
+    $result.Device = $device
 }
 catch {
     $result.Exception = $_.Exception

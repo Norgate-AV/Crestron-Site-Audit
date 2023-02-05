@@ -40,14 +40,3 @@ function Get-Aes256KeyHash {
 
     return Get-Sha256Hash -Data $Key
 }
-
-if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    try {
-        . "$PSScriptRoot\Get-Sha256Hash.ps1"
-    }
-    catch {
-        throw "Failed to import functions: $_"
-    }
-
-    Get-Aes256KeyHash @args
-}

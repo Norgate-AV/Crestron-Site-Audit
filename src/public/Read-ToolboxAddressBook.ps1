@@ -179,7 +179,3 @@ function Read-ToolboxAddressBook {
         $devices
     }
 }
-
-if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    Read-ToolboxAddressBook @args
-}

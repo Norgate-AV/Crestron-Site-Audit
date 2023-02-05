@@ -41,12 +41,7 @@ $result = @{
 }
 
 try {
-    $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
-    $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
-
-    Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-        . $_.FullName
-    }
+    Import-Module $(Resolve-Path -Path "$cwd/CrestronSiteAudit.psd1")
 
     $deviceCredential = Get-DeviceCredential -Credentials $credentials -Id $device.credentialId
 
@@ -75,7 +70,7 @@ try {
 
         $controlSystem.IPAddress = $controlSystem.IPAddress | Invoke-NormalizeIPAddress
 
-        [List[PSCustomObject]] $programInfo = ($controlSystem | Get-ControlSystemProgramInfo).ProgramInfoList
+        [System.Collections.Generic.List[PSCustomObject]] $programInfo = ($controlSystem | Get-ControlSystemProgramInfo).ProgramInfoList
 
         $versionInfo | Add-Member ProgramInfo $programInfo
 

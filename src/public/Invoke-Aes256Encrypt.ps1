@@ -29,51 +29,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-using namespace System.Collections.Generic
-
-function Get-EnvironmentFileVariableList {
+function Invoke-Aes256Encrypt {
     [CmdletBinding()]
 
-    param(
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Data,
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string]
-        $File
+        [string] $Key
     )
 
-    $File = Resolve-Path -Path $File
+    begin {}
 
-    $pattern = [regex] '^(?<variable>[\w]+)=(?<value>.+)$'
+    process {
+        try {
+            $iv = [System.Byte[]]::new(16)
+            $rng = [System.Security.Cryptography.RNGCryptoServiceProvider]::new()
+            $rng.GetBytes($iv)
 
-    try {
-        $content = Get-Content -Path $File -Raw
-    }
-    catch {
-        throw "Unable to read environment file: $File"
-    }
+            $aes = [System.Security.Cryptography.AesCryptoServiceProvider]::new()
+            $aes.Key = Get-Aes256KeyHash -Key $Key
+            $aes.IV = $iv
 
-    $patternMatches = $pattern.Matches($content)
+            $unencrypted = [System.Text.Encoding]::UTF8.GetBytes($Data)
 
-    if ($patternMatches.Count -eq 0) {
-        throw "No variables found in environment file."
-    }
+            $encryptor = $aes.CreateEncryptor()
+            $encrypted = $encryptor.TransformFinalBlock($unencrypted, 0, $unencrypted.Length)
 
-    $variableList = [List[PSCustomObject]]::new()
-
-    $patternMatches | ForEach-Object {
-        $match = $_
-
-        $variable = [PSCustomObject] @{
-            Variable = $match.Groups["variable"].Value
-            Value    = $match.Groups["value"].Value.Trim()
+            [byte[]] $fullData = $aes.IV + $encrypted
+            $result = [System.Convert]::ToBase64String($fullData)
         }
-
-        $variableList.Add($variable)
+        catch {
+            Write-Error $_.Exception.GetBaseException().Message
+        }
+        finally {
+            $aes.Dispose()
+            $rng.Dispose()
+        }
     }
 
-    return $variableList
-}
-
-if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    Get-EnvironmentFileVariableList @args
+    end {
+        if ($result) {
+            return $result
+        }
+    }
 }

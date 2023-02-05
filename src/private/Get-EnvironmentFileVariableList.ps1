@@ -29,18 +29,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Convert-Sha256HashToString {
+using namespace System.Collections.Generic
+
+function Get-EnvironmentFileVariableList {
     [CmdletBinding()]
 
-    param (
+    param(
         [Parameter(Mandatory = $true)]
-        [byte[]]
-        $Hash
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $File
     )
 
-    return [System.BitConverter]::ToString($hash).Replace("-", "")
-}
+    $File = Resolve-Path -Path $File
 
-if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    Convert-Sha256HashToString @args
+    $pattern = [regex] '^(?<variable>[\w]+)=(?<value>.+)$'
+
+    try {
+        $content = Get-Content -Path $File -Raw
+    }
+    catch {
+        throw "Unable to read environment file: $File"
+    }
+
+    $patternMatches = $pattern.Matches($content)
+
+    if ($patternMatches.Count -eq 0) {
+        throw "No variables found in environment file."
+    }
+
+    $variableList = [List[PSCustomObject]]::new()
+
+    $patternMatches | ForEach-Object {
+        $match = $_
+
+        $variable = [PSCustomObject] @{
+            Variable = $match.Groups["variable"].Value
+            Value    = $match.Groups["value"].Value.Trim()
+        }
+
+        $variableList.Add($variable)
+    }
+
+    return $variableList
 }

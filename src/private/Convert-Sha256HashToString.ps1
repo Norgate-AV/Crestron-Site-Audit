@@ -29,42 +29,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$device = $_
+function Convert-Sha256HashToString {
+    [CmdletBinding()]
 
-$cwd = $using:PSScriptRoot
+    param (
+        [Parameter(Mandatory = $true)]
+        [byte[]]
+        $Hash
+    )
 
-$result = @{
-    Device    = $device
-    Exception = $null
-}
-
-try {
-    $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
-    $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
-
-    Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-        . $_.FullName
-    }
-
-    if ($device.ErrorMessage) {
-        return $result
-    }
-
-    $deviceParams = @{
-        Device   = $device.IPAddress
-        Secure   = $device.Secure
-        Username = $device.Credential.Username
-        Password = $device.Credential.Password
-    }
-
-    $discoveredDevices = Read-AutoDiscovery @deviceParams
-    $device | Add-Member DiscoveredDevices $discoveredDevices
-
-    $result.Device = $device
-}
-catch {
-    $result.Exception = $_.Exception
-}
-finally {
-    $result
+    return [System.BitConverter]::ToString($hash).Replace("-", "")
 }
