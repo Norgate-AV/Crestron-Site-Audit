@@ -9,31 +9,31 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    RootModule        = 'CrestronSiteAudit.psm1'
+    RootModule           = 'CrestronSiteAudit.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.1.0'
+    ModuleVersion        = '0.1.0'
 
     # Supported PSEditions
-    # CompatiblePSEditions = @()
+    CompatiblePSEditions = @("Desktop")
 
     # ID used to uniquely identify this module
-    GUID              = 'cad02ad4-2050-418e-9b4a-5c694f484fbe'
+    GUID                 = 'cad02ad4-2050-418e-9b4a-5c694f484fbe'
 
     # Author of this module
-    Author            = 'Norgate AV Solutions Ltd'
+    Author               = 'Norgate AV Solutions Ltd'
 
     # Company or vendor of this module
-    CompanyName       = 'Norgate AV Solutions Ltd'
+    CompanyName          = 'Norgate AV Solutions Ltd'
 
     # Copyright statement for this module
-    Copyright         = '(c) 2023 Norgate AV Solutions Ltd. All rights reserved.'
+    Copyright            = '(c) 2023 Norgate AV Solutions Ltd. All rights reserved.'
 
     # Description of the functionality provided by this module
-    # Description = ''
+    Description          = 'A tool for auditing Crestron devices on a network.'
 
     # Minimum version of the Windows PowerShell engine required by this module
-    # PowerShellVersion = ''
+    PowerShellVersion    = '5.1'
 
     # Name of the Windows PowerShell host required by this module
     # PowerShellHostName = ''
@@ -51,13 +51,21 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    # RequiredModules = @()
+    # RequiredModules      = @(
+    #     @{
+    #         ModuleName    = 'PSDepend'
+    #         ModuleVersion = 'latest'
+    #     }
+    # )
+    RequiredModules      = @(
+        "PSDepend"
+    )
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    # ScriptsToProcess = @()
+    ScriptsToProcess     = @("./scripts/ImportChecks.ps1")
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()
@@ -69,16 +77,16 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @()
+    FunctionsToExport    = @()
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-    CmdletsToExport   = '*'
+    CmdletsToExport      = '*'
 
     # Variables to export from this module
-    VariablesToExport = '*'
+    VariablesToExport    = '*'
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport   = '*'
+    AliasesToExport      = '*'
 
     # DSC resources to export from this module
     # DscResourcesToExport = @()
@@ -90,12 +98,12 @@
     # FileList = @()
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
-    PrivateData       = @{
+    PrivateData          = @{
 
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            # Tags = @()
+            Tags         = @("Crestron", "Audit", "Network")
 
             # A URL to the license for this module.
             LicenseUri   = 'https://github.com/Norgate-AV-Solutions-Ltd/Crestron-Site-Audit/blob/master/LICENSE'
