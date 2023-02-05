@@ -356,6 +356,9 @@ function Invoke-CrestronSiteAudit {
     Write-Console -ForegroundColor Green -Message "Output Directory => $OutputDirectory"
     Write-Console -ForegroundColor Green -Message "Audit File => $outputFile"
 
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'moduleName', Justification = 'Referenced in scriptblock.')]
+    $moduleName = $MyInvocation.MyCommand.ModuleName
+
     $commonExcelParams = @{
         FreezeTopRow = $true
         BoldTopRow   = $true
