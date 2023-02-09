@@ -29,30 +29,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-Sha256Hash {
+using namespace System.Collections.Generic
+
+function Get-EnvironmentFileVariableList {
     [CmdletBinding()]
 
-    param (
+    param(
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]
-        $Data
+        $File
     )
 
+    $File = Resolve-Path -Path $File
+
+    $pattern = [regex] '^(?<variable>[\w]+)=(?<value>.+)$'
+
     try {
-        $hasher = [System.Security.Cryptography.HashAlgorithm]::Create('sha256')
-        $hash = $hasher.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($Data))
+        $content = Get-Content -Path $File -Raw
     }
     catch {
-        throw "Failed to create SHA256 hash: $($_.Exception.GetBaseException().Message)"
-    }
-    finally {
-        $hasher.Dispose()
+        throw "Unable to read environment file: $File"
     }
 
-    return $hash
-}
+    $patternMatches = $pattern.Matches($content)
 
-if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    Get-Sha256Hash @args
+    if ($patternMatches.Count -eq 0) {
+        throw "No variables found in environment file."
+    }
+
+    $variableList = [List[PSCustomObject]]::new()
+
+    $patternMatches | ForEach-Object {
+        $match = $_
+
+        $variable = [PSCustomObject] @{
+            Variable = $match.Groups["variable"].Value
+            Value    = $match.Groups["value"].Value.Trim()
+        }
+
+        $variableList.Add($variable)
+    }
+
+    return $variableList
 }

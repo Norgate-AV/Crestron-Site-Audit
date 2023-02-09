@@ -32,6 +32,7 @@ SOFTWARE.
 $device = $_
 
 $cwd = $using:PSScriptRoot
+$moduleName = $using:moduleName
 
 $result = @{
     Device    = $device
@@ -39,13 +40,7 @@ $result = @{
 }
 
 try {
-    $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
-    $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
-    $commandsDirectory = Join-Path -Path $libDirectory -ChildPath "commands"
-
-    Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-        . $_.FullName
-    }
+    Import-Module -Name "$cwd/$moduleName.psm1" -Force
 
     if ($device.ErrorMessage) {
         return $result
@@ -60,7 +55,7 @@ try {
 
     $controlSystem = $device | Select-ControlSystem
     if ($controlSystem) {
-        $commands = Import-LocalizedData -FileName ControlSystemCommands -BaseDirectory $commandsDirectory
+        $commands = Import-PowerShellDataFile -Path "$cwd/data/ControlSystemCommands.psd1"
         $runtimeInfoResult = $device | Get-DeviceRuntimeInfo -Commands $commands
 
         if (!$runtimeInfoResult.Exception) {
@@ -75,7 +70,7 @@ try {
 
     $touchPanel = $device | Select-TouchPanel
     if ($touchPanel) {
-        $commands = Import-LocalizedData -FileName TouchPanelCommands -BaseDirectory $commandsDirectory
+        $commands = Import-PowerShellDataFile -Path "$cwd/data/TouchPanelCommands.psd1"
         $runtimeInfoResult = $device | Get-DeviceRuntimeInfo -Commands $commands
 
         if (!$runtimeInfoResult.Exception) {

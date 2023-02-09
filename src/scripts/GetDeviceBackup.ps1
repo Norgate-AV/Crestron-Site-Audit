@@ -29,35 +29,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Find-Up {
-    [CmdletBinding()]
+$device = $_
 
-    param(
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $FileName,
+$cwd = $using:PSScriptRoot
+$moduleName = $using:moduleName
+$filter = $using:Filter
+$logsOnly = $using:LogsOnly
 
-        [Parameter(Mandatory = $false)]
-        [string]
-        $Path = $PWD
-    )
-
-    $Path = Resolve-Path -Path $Path
-
-    while ($Path) {
-        $file = Join-Path -Path $Path -ChildPath $FileName
-
-        if (Test-Path -Path $file) {
-            return $file
-        }
-
-        $Path = Split-Path -Path $Path -Parent
-    }
-
-    return $null
+$result = @{
+    Device    = $device
+    Exception = $null
 }
 
-if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    Find-Up @args
+try {
+    Import-Module "$cwd/$moduleName.psm1" -Force
+
+    if ($device.ErrorMessage) {
+        return $result
+    }
+
+    $device | Get-DeviceBackup -OutputDirectory $device.DeviceDirectory -Filter $filter -LogsOnly:$logsOnly
+}
+catch {
+    $result.Exception = $_.Exception
+}
+finally {
+    $result
 }

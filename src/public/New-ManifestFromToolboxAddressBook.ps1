@@ -116,19 +116,3 @@ function New-ManifestFromToolboxAddressBook {
 
     return $manifest | ConvertTo-Json
 }
-
-if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    try {
-        . "$PSScriptRoot\Read-ToolboxAddressBook.ps1"
-        . "$PSScriptRoot\Get-EnvironmentFileVariableList.ps1"
-        . "$PSScriptRoot\Get-Aes256KeyHash.ps1"
-        . "$PSScriptRoot\Get-Sha256Hash.ps1"
-        . "$PSScriptRoot\Invoke-Aes256Encrypt.ps1"
-        . "$PSScriptRoot\Find-Up.ps1"
-    }
-    catch {
-        throw "Failed to import functions: $_"
-    }
-
-    New-ManifestFromToolboxAddressBook @args
-}

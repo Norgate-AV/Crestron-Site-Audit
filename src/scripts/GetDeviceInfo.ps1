@@ -33,6 +33,7 @@ $device = $_
 
 $credentials = $using:credentials
 $cwd = $using:PSScriptRoot
+$moduleName = $using:moduleName
 
 $result = @{
     Device     = $device
@@ -41,12 +42,7 @@ $result = @{
 }
 
 try {
-    $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
-    $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
-
-    Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-        . $_.FullName
-    }
+    Import-Module "$cwd/$moduleName.psm1" -Force
 
     $deviceCredential = Get-DeviceCredential -Credentials $credentials -Id $device.credentialId
 
@@ -75,7 +71,7 @@ try {
 
         $controlSystem.IPAddress = $controlSystem.IPAddress | Invoke-NormalizeIPAddress
 
-        [List[PSCustomObject]] $programInfo = ($controlSystem | Get-ControlSystemProgramInfo).ProgramInfoList
+        [System.Collections.Generic.List[PSCustomObject]] $programInfo = ($controlSystem | Get-ControlSystemProgramInfo).ProgramInfoList
 
         $versionInfo | Add-Member ProgramInfo $programInfo
 

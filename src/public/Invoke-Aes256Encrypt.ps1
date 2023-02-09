@@ -29,34 +29,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$device = $_
+function Invoke-Aes256Encrypt {
+    [CmdletBinding()]
 
-$cwd = $using:PSScriptRoot
-$filter = $using:Filter
-$logsOnly = $using:LogsOnly
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Data,
 
-$result = @{
-    Device    = $device
-    Exception = $null
-}
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Key
+    )
 
-try {
-    $libDirectory = Join-Path -Path $cwd -ChildPath "lib"
-    $utilsDirectory = Join-Path -Path $libDirectory -ChildPath "utils"
+    begin {}
 
-    Get-ChildItem -Path $utilsDirectory -Filter "*.ps1" -Recurse | ForEach-Object {
-        . $_.FullName
+    process {
+        try {
+            $iv = [System.Byte[]]::new(16)
+            $rng = [System.Security.Cryptography.RNGCryptoServiceProvider]::new()
+            $rng.GetBytes($iv)
+
+            $aes = [System.Security.Cryptography.AesCryptoServiceProvider]::new()
+            $aes.Key = Get-Aes256KeyHash -Key $Key
+            $aes.IV = $iv
+
+            $unencrypted = [System.Text.Encoding]::UTF8.GetBytes($Data)
+
+            $encryptor = $aes.CreateEncryptor()
+            $encrypted = $encryptor.TransformFinalBlock($unencrypted, 0, $unencrypted.Length)
+
+            [byte[]] $fullData = $aes.IV + $encrypted
+            $result = [System.Convert]::ToBase64String($fullData)
+        }
+        catch {
+            Write-Error $_.Exception.GetBaseException().Message
+        }
+        finally {
+            $aes.Dispose()
+            $rng.Dispose()
+        }
     }
 
-    if ($device.ErrorMessage) {
-        return $result
+    end {
+        if ($result) {
+            return $result
+        }
     }
-
-    $device | Get-DeviceBackup -OutputDirectory $device.DeviceDirectory -Filter $filter -LogsOnly:$logsOnly
-}
-catch {
-    $result.Exception = $_.Exception
-}
-finally {
-    $result
 }

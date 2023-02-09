@@ -29,59 +29,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Invoke-Aes256Decrypt {
+function Find-Up {
     [CmdletBinding()]
 
-    param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string] $Data,
-
+    param(
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $Key
+        [string]
+        $FileName,
+
+        [Parameter(Mandatory = $false)]
+        [string]
+        $Path = $PWD
     )
 
-    begin {}
+    $Path = Resolve-Path -Path $Path
 
-    process {
-        try {
-            $aes = [System.Security.Cryptography.AesCryptoServiceProvider]::new()
-            $aes.Key = Get-Aes256KeyHash -Key $Key
+    while ($Path) {
+        $file = Join-Path -Path $Path -ChildPath $FileName
 
-            $encrypted = [System.Convert]::FromBase64String($Data)
-
-            $iv = $encrypted[0..15]
-            $aes.IV = $iv
-
-            $decryptor = $aes.CreateDecryptor()
-            $unencrypted = $decryptor.TransformFinalBlock($encrypted, 16, $encrypted.Length - 16)
-
-            $result = [System.Text.Encoding]::UTF8.GetString($unencrypted)
+        if (Test-Path -Path $file) {
+            return $file
         }
-        catch {
-            Write-Error $_.Exception.GetBaseException().Message
-        }
-        finally {
-            $aes.Dispose()
-        }
+
+        $Path = Split-Path -Path $Path -Parent
     }
 
-    end {
-        if ($result) {
-            return $result
-        }
-    }
-}
-
-if ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
-    try {
-        . "$PSScriptRoot\Get-Aes256KeyHash.ps1"
-        . "$PSScriptRoot\Get-Sha256Hash.ps1"
-    }
-    catch {
-        throw "Failed to import functions: $_"
-    }
-
-    Invoke-Aes256Decrypt @args
+    return $null
 }
